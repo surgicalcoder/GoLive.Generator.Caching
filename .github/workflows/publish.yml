@@ -1,4 +1,4 @@
-name: Publish Generator Entities
+name: Publish CacheTower and MemoryCache
 on:
   workflow_dispatch:
 
