@@ -40,8 +40,31 @@ public static class SourceCodeGenerator
                 handleSync(source, classToGen, member);
             }
             
-
-
+            source.AppendCloseCurlyBracketLine();
+            
+            
+            
+            
+            if (member.IsGenericMethod)
+            {
+                source.AppendLine($"public void {member.Name.FirstCharToUpper()}_EvictCache" +
+                                  $"<{string.Join(",", member.GenericConstraints)}>" +
+                                  $"({string.Join(",", getMethodParameter(member.Parameters) )})"); 
+            }
+            else
+            {
+                source.AppendLine($"public void {member.Name.FirstCharToUpper()}_EvictCache" +
+                                  $"({string.Join(",", getMethodParameter(member.Parameters) )})");
+            }
+            source.AppendOpenCurlyBracketLine();
+            source.AppendLine("MemoryCache.Remove(");
+            source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",",member.Parameters.Select(e=>e.Type))}> (\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}\" ");
+            if (member.Parameters.Count > 0)
+            {
+                source.Append($", {string.Join(",", member.Parameters.Select(e=>e.Name))} ");
+            }
+            source.Append(")");
+            source.AppendLine(");");
             source.AppendCloseCurlyBracketLine();
         }
         

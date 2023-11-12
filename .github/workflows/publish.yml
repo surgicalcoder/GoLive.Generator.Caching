@@ -7,7 +7,7 @@ jobs:
     env:
      CacheTowerProject: 'GoLive.Generator.Caching.CacheTower/GoLive.Generator.Caching.CacheTower.csproj'
      MicrosoftMemoryCacheProject: 'GoLive.Generator.Caching.MicrosoftMemoryCache/GoLive.Generator.Caching.MicrosoftMemoryCache.csproj'
-     BUILD_VER : '1.0'
+     BUILD_VER : '1.1'
     name: build, pack & publish
     runs-on: ubuntu-latest
     steps:
