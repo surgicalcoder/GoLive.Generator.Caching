@@ -9,8 +9,10 @@ public static class SourceCodeGenerator
     public static void Generate(SourceStringBuilder source, ClassToGenerate classToGen)
     {
         source.AppendLine("using Microsoft.Extensions.Caching.Memory;");
+        source.AppendLine("using System.Threading.Tasks;");
+        source.AppendLine();
+        
         source.AppendLine($"namespace {classToGen.Namespace};");
-
         source.AppendLine($"public partial class {classToGen.Name}");
         source.AppendOpenCurlyBracketLine();
         source.AppendLine(2);

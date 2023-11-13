@@ -10,6 +10,8 @@ public static class SourceCodeGenerator
     {
         source.AppendLine("using CacheTower;");
         source.AppendLine("using System.Text.Json;");
+        source.AppendLine("using System.Threading.Tasks;");
+        source.AppendLine();
         source.AppendLine($"namespace {classToGen.Namespace};");
 
         source.AppendLine($"public partial class {classToGen.Name}");
