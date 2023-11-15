@@ -8,6 +8,7 @@ public static class SourceCodeGenerator
 {
     public static void Generate(SourceStringBuilder source, ClassToGenerate classToGen)
     {
+        source.AppendLine("using System;");
         source.AppendLine("using CacheTower;");
         source.AppendLine("using System.Text.Json;");
         source.AppendLine("using System.Threading.Tasks;");

@@ -8,6 +8,7 @@ public static class SourceCodeGenerator
 {
     public static void Generate(SourceStringBuilder source, ClassToGenerate classToGen)
     {
+        source.AppendLine("using System;");
         source.AppendLine("using Microsoft.Extensions.Caching.Memory;");
         source.AppendLine("using System.Threading.Tasks;");
         source.AppendLine();
