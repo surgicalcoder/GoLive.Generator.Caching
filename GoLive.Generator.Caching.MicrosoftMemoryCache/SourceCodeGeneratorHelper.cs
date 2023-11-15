@@ -7,7 +7,7 @@ public static class SourceCodeGeneratorHelper
 {
     public static string getCommaIfParameters(IList member)
     {
-        return (member.Count > 1 ? "," : "" );
+        return (member.Count > 0 ? "," : "" );
     }
 
     public static IEnumerable<string> getMethodParameter(List<ParameterToGenerate> memberParameters)

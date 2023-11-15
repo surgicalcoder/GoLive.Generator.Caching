@@ -12,5 +12,11 @@ public partial class Class1
     {
         return "Wibble Wobble";
     }
+    
+    [Cache(3, TimeFrame.Minute, 5, TimeFrame.Minute)]
+    private async Task<string> getAsync2(string SingleInput)
+    {
+        return "blarg";
+    }
 }
 
