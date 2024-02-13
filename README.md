@@ -27,6 +27,7 @@ public async System.Threading.Tasks.Task<string> GetAsyncValue(string Input1, st
 
 ```
 
-Comes in two flavours:
+Comes in two...no, three flavours:
 - CacheTower
 - Microsoft's IMemoryCache
+- FusionCache

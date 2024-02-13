@@ -16,7 +16,7 @@
         <Company>N/A</Company>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Description>Auto generate wrappers for caching - for using with CacheTower</Description>
-        <Copyright>Copyright 2023 - SurgicalCoder</Copyright>
+        <Copyright>Copyright 2024 - SurgicalCoder</Copyright>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -28,8 +28,8 @@
         <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
         <IncludeBuildOutput>false</IncludeBuildOutput>
         <DevelopmentDependency>true</DevelopmentDependency>
-        <PackageProjectUrl>GoLive.Generator.Caching</PackageProjectUrl>
-        <RepositoryUrl>GoLive.Generator.Caching</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/surgicalcoder/GoLive.Generator.Caching</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/surgicalcoder/GoLive.Generator.Caching</RepositoryUrl>
     </PropertyGroup>
     <ItemGroup>
         <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />

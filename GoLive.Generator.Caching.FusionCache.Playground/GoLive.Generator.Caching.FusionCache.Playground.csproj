@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PublishRepositoryUrl>false</PublishRepositoryUrl>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="ZiggyCreatures.FusionCache" Version="1.0.0-preview1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\GoLive.Generator.Caching.FusionCache\GoLive.Generator.Caching.FusionCache.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+</Project>

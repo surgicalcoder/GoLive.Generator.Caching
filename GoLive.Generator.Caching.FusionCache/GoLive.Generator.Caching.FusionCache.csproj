@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
@@ -11,11 +11,11 @@
         <IncludeBuildOutput>true</IncludeBuildOutput>
         <DevelopmentDependency>true</DevelopmentDependency>
 
-        <PackageId>GoLive.Generator.Caching.MicrosoftMemoryCache</PackageId>
+        <PackageId>GoLive.Generator.Caching.CacheTower</PackageId>
         <Authors>SurgicalCoder</Authors>
         <Company>N/A</Company>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Description>Auto generate wrappers for caching - for using with Microsoft's  Microsoft.Extensions.Caching.Memory.IMemoryCache / Microsoft.Extensions.Caching.Abstractions</Description>
+        <Description>Auto generate wrappers for caching - for using with FusionCache</Description>
         <Copyright>Copyright 2024 - SurgicalCoder</Copyright>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
