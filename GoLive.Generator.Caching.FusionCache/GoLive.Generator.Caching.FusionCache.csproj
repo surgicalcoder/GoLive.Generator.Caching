@@ -11,7 +11,7 @@
         <IncludeBuildOutput>true</IncludeBuildOutput>
         <DevelopmentDependency>true</DevelopmentDependency>
 
-        <PackageId>GoLive.Generator.Caching.CacheTower</PackageId>
+        <PackageId>GoLive.Generator.Caching.FusionCache</PackageId>
         <Authors>SurgicalCoder</Authors>
         <Company>N/A</Company>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

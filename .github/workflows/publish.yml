@@ -1,4 +1,4 @@
-name: Publish CacheTower and MemoryCache
+name: Publish ALL
 on:
   workflow_dispatch:
 
