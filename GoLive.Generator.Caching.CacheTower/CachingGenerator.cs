@@ -10,7 +10,7 @@ public class CachingGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         context.RegisterPostInitializationOutput(AddAdditionalFiles);
-
+        
         var classDeclarations = context.SyntaxProvider.CreateSyntaxProvider(static (s, _) => Scanner.CanBeCached(s),
                 static (ctx, _) => GetDeclarations(ctx))
             .Where(static c => c is not null)

@@ -52,7 +52,6 @@ public static class SourceCodeGenerator
             }
             
             source.AppendOpenCurlyBracketLine();
-            //await MemoryCache.EvictAsync(JsonSerializer.Serialize(new Tuple<string, string, string>("GoLive.Generator.Caching.CacheTower.Playground", Input1, wibble)));
             source.AppendLine("await MemoryCache.EvictAsync(");
             source.Append("(JsonSerializer.Serialize(");
             source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",",member.Parameters.Select(e=>e.Type))}> (\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}\" ");
