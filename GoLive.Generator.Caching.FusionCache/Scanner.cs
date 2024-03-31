@@ -60,6 +60,7 @@ public class Scanner
             }
 
             memberToGenerate.Parameters = methodSymbol.Parameters.Select(f => new ParameterToGenerate { HasDefaultValue = f.HasExplicitDefaultValue, DefaultValue = getDefaultValue(f), Name = f.Name, Type = f.Type.ToDisplayString() }).ToList();
+            memberToGenerate.GenericTypeParameters = methodSymbol.TypeParameters.Select(f => new ParameterToGenerate { Name = f.Name }).ToList(); // TODO Change to List<String> at one point
 
             yield return memberToGenerate;
         }

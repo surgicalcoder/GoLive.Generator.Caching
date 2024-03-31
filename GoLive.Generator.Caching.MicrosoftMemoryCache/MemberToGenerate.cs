@@ -13,4 +13,5 @@ public class MemberToGenerate
     public bool IsGenericMethod { get; set; }
     public string[] GenericConstraints { get; set; }
     public List<ParameterToGenerate> Parameters { get; set; }
+    public List<ParameterToGenerate> GenericTypeParameters { get; set; }
 }

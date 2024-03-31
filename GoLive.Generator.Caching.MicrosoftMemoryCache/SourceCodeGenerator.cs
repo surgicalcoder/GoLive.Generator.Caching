@@ -139,14 +139,9 @@ public static class SourceCodeGenerator
     
     private static string getTypeParametersForAsyncInvocation(MemberToGenerate member)
     {
-        if (member.returnType.IsGenericType && member.returnType.OriginalDefinition.TypeParameters.Length > 0)
+        if (member.GenericTypeParameters.Any())
         {
-            var retr = string.Join(",", string.Join(", ", GetParameterTypes(member.returnType).ToList()));
-
-            if (!string.IsNullOrWhiteSpace(retr))
-            {
-                return $"<{retr}>";
-            }
+            return $"<{string.Join(", ", member.GenericTypeParameters.Select(r => r.Name))}>";
         }
 
         return string.Empty;
