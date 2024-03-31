@@ -1,4 +1,4 @@
-name: Publish ALL
+name: Publish Cache Tower
 on:
   workflow_dispatch:
 
