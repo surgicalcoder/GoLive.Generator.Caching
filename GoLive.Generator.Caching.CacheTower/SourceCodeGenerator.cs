@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 using static GoLive.Generator.Caching.CacheTower.SourceCodeGeneratorHelper;
 
 namespace GoLive.Generator.Caching.CacheTower;
@@ -81,7 +83,7 @@ public static class SourceCodeGenerator
         }
         source.Append(")");
         source.AppendLine("), async arg =>");
-        source.AppendLine($"await {member.Name}({string.Join(",", member.Parameters.Select(e=>e.Name))}");
+        source.AppendLine($"await {member.Name}{getTypeParametersForAsyncInvocation(member)}({string.Join(",", member.Parameters.Select(e=>e.Name))}");
         source.Append("), new CacheSettings(");
         source.Append(getCacheTimeFrameValue(member));
         source.Append(",");
@@ -110,4 +112,45 @@ public static class SourceCodeGenerator
             TimeFrame.Day => $"TimeSpan.FromDays({member.StaleDuration})",
             _ => throw new ArgumentOutOfRangeException()
         };
+    
+    
+    private static string getTypeParametersForAsyncInvocation(MemberToGenerate member)
+    {
+        if (member.returnType.IsGenericType && member.returnType.OriginalDefinition.TypeParameters.Length > 0)
+        {
+            var retr = string.Join(",", string.Join(", ", GetParameterTypes(member.returnType).ToList()));
+
+            if (!string.IsNullOrWhiteSpace(retr))
+            {
+                return $"<{retr}>";
+            }
+        }
+
+        return string.Empty;
+    }
+    static IEnumerable<string> GetParameterTypes(ITypeSymbol type)
+    {
+        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        {
+            foreach (var arg in namedType.TypeArguments)
+            {
+                foreach (var paramType in GetParameterTypes(arg))
+                {
+                    yield return paramType;
+                }
+            }
+        }
+        else
+        {
+            if (!IsSimpleType(type))
+            {
+                yield return type.Name;
+            }
+        }
+    }
+    
+    static bool IsSimpleType(ITypeSymbol type)
+    {
+        return type.SpecialType != SpecialType.None || type.Name == "String";
+    }
 }

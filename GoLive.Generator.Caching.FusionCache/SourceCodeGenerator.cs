@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using Microsoft.CodeAnalysis;
 using static GoLive.Generator.Caching.FusionCache.SourceCodeGeneratorHelper;
 
 namespace GoLive.Generator.Caching.FusionCache;
@@ -96,7 +99,7 @@ public static class SourceCodeGenerator
         
         source.Append(", async _ =>");
         source.AppendOpenCurlyBracketLine();
-        source.AppendLine($"return await {member.Name}({string.Join(",", member.Parameters.Select(e=>e.Name))}");
+        source.AppendLine($"return await {member.Name}{getTypeParametersForAsyncInvocation(member)}({string.Join(",", member.Parameters.Select(e=>e.Name))}");
         source.AppendLine(");");
         source.AppendCloseCurlyBracketLine();
         source.AppendLine($", {getTimeFrameValue(member)}");
@@ -140,30 +143,43 @@ public static class SourceCodeGenerator
     }    
     
     
-    
-    private static void handleSync_old(SourceStringBuilder source, ClassToGenerate classToGen, MemberToGenerate member)
+    private static string getTypeParametersForAsyncInvocation(MemberToGenerate member)
     {
-        source.Append($"Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",",member.Parameters.Select(e=>e.Type))}> cacheKey = " +
-                      $"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",",member.Parameters.Select(e=>e.Type))}>" +
-                      $"(\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}\"");
-
-        if (member.Parameters.Count > 0)
+        if (member.returnType.IsGenericType && member.returnType.OriginalDefinition.TypeParameters.Length > 0)
         {
-            source.Append($", {string.Join(",", member.Parameters.Select(e=>e.Name))} ");
+            var retr = string.Join(",", string.Join(", ", GetParameterTypes(member.returnType).ToList()));
+
+            if (!string.IsNullOrWhiteSpace(retr))
+            {
+                return $"<{retr}>";
+            }
         }
-            
-        source.AppendLine(");");
-        source.AppendLine(2);
-            
-        source.AppendLine($@"if (MemoryCache.TryGetValue(cacheKey, out {member.returnType} value))
-        {{
-            return value;
-        }}");
-            
-        source.AppendLine(2);
-            
-        source.AppendLine($"value = {member.Name}({string.Join(",", member.Parameters.Select(e=>e.Name))});");
-        source.AppendLine($"MemoryCache.Set<{member.returnType}>(cacheKey, value);");
-        source.AppendLine("return value;");
+
+        return string.Empty;
+    }
+    static IEnumerable<string> GetParameterTypes(ITypeSymbol type)
+    {
+        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        {
+            foreach (var arg in namedType.TypeArguments)
+            {
+                foreach (var paramType in GetParameterTypes(arg))
+                {
+                    yield return paramType;
+                }
+            }
+        }
+        else
+        {
+            if (!IsSimpleType(type))
+            {
+                yield return type.Name;
+            }
+        }
+    }
+    
+    static bool IsSimpleType(ITypeSymbol type)
+    {
+        return type.SpecialType != SpecialType.None || type.Name == "String";
     }
 }

@@ -29,4 +29,10 @@ public partial class c1
     {
         return "blarg";
     }
+    
+    [Cache(3, TimeFrame.Minute)]
+    private async Task<T> getAsync3<T>(string SingleInput)
+    {
+        return default(T);
+    }
 }

@@ -9,7 +9,7 @@ public class MemberToGenerate
     public string Name { get; set; }
     public int CacheDuration { get; set; }
     public TimeFrame CacheDurationTimeFrame { get; set; }
-    public ITypeSymbol returnType { get; set; }
+    public INamedTypeSymbol returnType { get; set; }
     public bool IsGenericMethod { get; set; }
     public string[] GenericConstraints { get; set; }
     public List<ParameterToGenerate> Parameters { get; set; }

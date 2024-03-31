@@ -1,0 +1,9 @@
+﻿{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "SourceGen": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../GoLive.Generator.Caching.FusionCache.Playground/GoLive.Generator.Caching.FusionCache.Playground.csproj"
+    }
+  }
+}

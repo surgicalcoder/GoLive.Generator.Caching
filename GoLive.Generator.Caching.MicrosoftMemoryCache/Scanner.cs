@@ -45,7 +45,7 @@ public class Scanner
             var memberToGenerate = new MemberToGenerate
             {
                 Name = methodSymbol.Name,
-                returnType = methodSymbol.ReturnType,
+                returnType = methodSymbol.ReturnType as INamedTypeSymbol,
                 Async = methodSymbol.IsAsync
             };
 
