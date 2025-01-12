@@ -22,6 +22,8 @@ public static class SourceCodeGenerator
         source.AppendOpenCurlyBracketLine();
         source.AppendLine(2);
         
+        source.AppendLine("private JsonSerializerOptions memoryCacheJsonSerializerOptions = new JsonSerializerOptions { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never };");
+        
         foreach (var member in classToGen.Members)
         {
             if (member.IsGenericMethod)
@@ -72,6 +74,10 @@ public static class SourceCodeGenerator
                 source.Append($", {string.Join(",", member.Parameters.Select(e=>e.Name))} ");
             }
             source.Append(")");
+            if (!member.ObeyIgnoreProperties)
+            {
+                source.Append(", memoryCacheJsonSerializerOptions");
+            }
             source.Append(")");
             source.Append(")");
             source.AppendLine(");");
@@ -95,6 +101,10 @@ public static class SourceCodeGenerator
             source.Append($", {string.Join(",", member.Parameters.Select(e=>e.Name))} ");
         }
         source.Append(")");
+        if (!member.ObeyIgnoreProperties)
+        {
+            source.Append(", new JsonSerializerOptions{DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never}");
+        }
         source.AppendLine(")");
         
         source.Append(", async _ =>");

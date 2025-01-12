@@ -62,6 +62,11 @@ public static class SourceCodeGenerator
                 source.Append($", {string.Join(",", member.Parameters.Select(e=>e.Name))} ");
             }
             source.Append(")");
+
+            if (!member.ObeyIgnoreProperties)
+            {
+                source.Append(", new JsonSerializerOptions{DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never}");
+            }
             source.AppendLine(")));");
             source.AppendCloseCurlyBracketLine();
         }
@@ -82,6 +87,10 @@ public static class SourceCodeGenerator
             source.Append($", {string.Join(",", member.Parameters.Select(e=>e.Name))} ");
         }
         source.Append(")");
+        if (!member.ObeyIgnoreProperties)
+        {
+            source.Append(", new JsonSerializerOptions{DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never}");
+        }
         source.AppendLine("), async arg =>");
         source.AppendLine($"await {member.Name}{getTypeParametersForAsyncInvocation(member)}({string.Join(",", member.Parameters.Select(e=>e.Name))}");
         source.Append("), new CacheSettings(");

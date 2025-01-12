@@ -54,6 +54,7 @@ public class Scanner
             memberToGenerate.CacheDurationTimeFrame = (TimeFrame)cacheAttr.ConstructorArguments.FirstOrDefault(r => r is { Kind: TypedConstantKind.Enum }).Value;
             memberToGenerate.StaleDuration = (int)cacheAttr.ConstructorArguments.LastOrDefault(r => r is { Type: { SpecialType: SpecialType.System_Int32 } }).Value;
             memberToGenerate.StaleDurationTimeFrame = (TimeFrame)cacheAttr.ConstructorArguments.LastOrDefault(r => r is { Kind: TypedConstantKind.Enum }).Value;
+            memberToGenerate.ObeyIgnoreProperties = (bool)cacheAttr.ConstructorArguments.LastOrDefault(r => r is { Type: { SpecialType: SpecialType.System_Boolean } }).Value;
             
             if (methodSymbol.IsGenericMethod)
             {

@@ -8,6 +8,7 @@ public class MemberToGenerate
     public bool Async { get; set; }
     public string Name { get; set; }
     public int CacheDuration { get; set; }
+    public bool ObeyIgnoreProperties { get; set; }
     public TimeFrame CacheDurationTimeFrame { get; set; }
     public INamedTypeSymbol returnType { get; set; }
     public bool IsGenericMethod { get; set; }

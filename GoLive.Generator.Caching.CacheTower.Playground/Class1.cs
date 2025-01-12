@@ -18,5 +18,12 @@ public partial class Class1
     {
         return "blarg";
     }
+    
+    
+    [Cache(3, TimeFrame.Minute, 5, TimeFrame.Minute, ObeyIgnoreProperties: true)]
+    private async Task<string> dontIgnorePropertiesTest(string SingleInput)
+    {
+        return "blarg";
+    }
 }
 

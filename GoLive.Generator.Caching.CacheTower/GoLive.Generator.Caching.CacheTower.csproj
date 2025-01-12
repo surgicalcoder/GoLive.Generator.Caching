@@ -16,7 +16,7 @@
         <Company>N/A</Company>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Description>Auto generate wrappers for caching - for using with CacheTower</Description>
-        <Copyright>Copyright 2024 - SurgicalCoder</Copyright>
+        <Copyright>Copyright 2024 - 2025 - SurgicalCoder</Copyright>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>

@@ -52,6 +52,7 @@ public class Scanner
             var cacheAttr = attr.FirstOrDefault(e => e.AttributeClass.ToString() == "GoLive.Generator.Caching.FusionCache.CacheAttribute"); // TODO 
             memberToGenerate.CacheDuration = (int)cacheAttr.ConstructorArguments.FirstOrDefault(r => r is { Type: { SpecialType: SpecialType.System_Int32 } }).Value;
             memberToGenerate.CacheDurationTimeFrame = (TimeFrame)cacheAttr.ConstructorArguments.FirstOrDefault(r => r is { Kind: TypedConstantKind.Enum }).Value;
+            memberToGenerate.ObeyIgnoreProperties = (bool)cacheAttr.ConstructorArguments.LastOrDefault(r => r is { Type: { SpecialType: SpecialType.System_Boolean } }).Value;
             
             if (methodSymbol.IsGenericMethod)
             {
