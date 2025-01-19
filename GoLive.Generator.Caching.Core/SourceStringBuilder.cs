@@ -18,6 +18,23 @@ public class SourceStringBuilderBracket : IDisposable
     }
 }
 
+public class SourceStringBuilderParentheses : IDisposable
+{
+    private SourceStringBuilder builder;
+    public SourceStringBuilderParentheses(SourceStringBuilder source)
+    {
+        builder = source;
+        builder.Append("(");
+        builder.IncreaseIndent();
+    }
+    public void Dispose()
+    {
+        builder.Append(")");
+        builder.DecreaseIndent();
+    }
+}
+
+
 public class SourceStringBuilder
 {
     private readonly string SingleIndent = new string(' ', 4);
@@ -30,12 +47,12 @@ public class SourceStringBuilder
         return new SourceStringBuilderBracket(this);
     }
 
-    public void IncreaseIndent()
+    internal void IncreaseIndent()
     {
         IndentLevel++;
     }
 
-    public void DecreaseIndent()
+    internal void DecreaseIndent()
     {
         IndentLevel--;
     }

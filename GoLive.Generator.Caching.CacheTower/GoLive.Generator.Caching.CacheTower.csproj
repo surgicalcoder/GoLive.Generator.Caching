@@ -31,19 +31,26 @@
         <PackageProjectUrl>https://github.com/surgicalcoder/GoLive.Generator.Caching</PackageProjectUrl>
         <RepositoryUrl>https://github.com/surgicalcoder/GoLive.Generator.Caching</RepositoryUrl>
     </PropertyGroup>
-    <ItemGroup>
-        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    </ItemGroup>
+	<ItemGroup>
+		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+		<None Include="$(OutputPath)\GoLive.Generator.Caching.Core.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+	</ItemGroup>
+	<PropertyGroup>
+		<!-- Ensure the generator and dependencies are copied to output -->
+		<GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
+	</PropertyGroup>
+	<Target Name="GetDependencyTargetPaths">
+		<ItemGroup>
+			<TargetPathWithTargetPlatformMoniker Include="$(OutputPath)\GoLive.Generator.Caching.Core.dll" IncludeRuntimeDependency="false" />
+		</ItemGroup>
+	</Target>
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.12.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.7.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Remove="Resources\AdditionalFiles.cs" />
-    </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\GoLive.Generator.Caching.Core\GoLive.Generator.Caching.Core.csproj" />
+      <ProjectReference Include="..\GoLive.Generator.Caching.Core\GoLive.Generator.Caching.Core.csproj" PrivateAssets="all" />
     </ItemGroup>
 
 </Project>
