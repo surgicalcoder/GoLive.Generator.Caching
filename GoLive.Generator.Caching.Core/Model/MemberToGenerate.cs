@@ -18,4 +18,5 @@ public class MemberToGenerate
     public List<ParameterToGenerate> Parameters { get; set; }
     
     public List<ParameterToGenerate> GenericTypeParameters { get; set; }
+    public bool returnTypeUnwrappedTask { get; set; }
 }

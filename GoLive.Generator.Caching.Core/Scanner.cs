@@ -22,6 +22,9 @@ public class Scanner
         retr.Namespace = classSymbol.ContainingNamespace.ToDisplayString();
         retr.Members = ConvertToMembers(classSymbol).ToList();
 
+        retr.HasJsonOptions = classSymbol.GetMembers().OfType<IFieldSymbol>()
+            .Any(f => f.Type.ToDisplayString() == "System.Text.Json.JsonSerializerOptions" && f.Name == "MemoryCache_JsonOptions");
+
         return retr;
     }
     private static IEnumerable<MemberToGenerate> ConvertToMembers(INamedTypeSymbol classSymbol)
@@ -42,21 +45,22 @@ public class Scanner
             {
                 continue;
             }
-            
-            
+
+            var memberToGenerate = new MemberToGenerate
+            {
+                Name = methodSymbol.Name,
+                Async = methodSymbol.IsAsync
+            };
+
             var returnType = methodSymbol.ReturnType as INamedTypeSymbol;
 
             if (returnType is INamedTypeSymbol taskType && taskType.OriginalDefinition.ToString() == "System.Threading.Tasks.Task<TResult>")
             {
                 returnType = returnType.TypeArguments[0] as INamedTypeSymbol;
+                memberToGenerate.returnTypeUnwrappedTask = true;
             }
 
-            var memberToGenerate = new MemberToGenerate
-            {
-                Name = methodSymbol.Name,
-                returnType = returnType,
-                Async = methodSymbol.IsAsync
-            };
+            memberToGenerate.returnType = returnType;
 
             var cacheAttr = attr.FirstOrDefault(e => e.AttributeClass.ToString() == "GoLive.Generator.Caching.CacheAttribute");
             memberToGenerate.CacheDuration = (int)cacheAttr.ConstructorArguments.FirstOrDefault(r => r is { Type: { SpecialType: SpecialType.System_Int32 } }).Value;

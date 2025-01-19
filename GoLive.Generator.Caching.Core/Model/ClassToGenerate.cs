@@ -13,4 +13,5 @@ public class ClassToGenerate
     public List<MemberToGenerate> Members { get; set; } = new();
     public string Filename { get; set; }
     public string Namespace { get; set; }
+    public bool HasJsonOptions { get; set; }
 }

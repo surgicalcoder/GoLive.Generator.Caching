@@ -24,15 +24,17 @@ public static class SourceCodeGenerator
         {
             foreach (var member in classToGen.Members.Where(member => member.Async))
             {
+                string returnType = member.returnTypeUnwrappedTask ? $"Task<{member.returnType.ToDisplayString()}>" : member.returnType.ToDisplayString();
+
                 if (member.IsGenericMethod)
                 {
-                    source.AppendLine($"public {(member.Async ? "async" : "")} {member.returnType} {member.Name.FirstCharToUpper()}" +
+                    source.AppendLine($"public {(member.Async ? "async" : "")} {returnType} {member.Name.FirstCharToUpper()}" +
                                       $"<{string.Join(",", member.GenericConstraints)}>" +
                                       $"({string.Join(",", getMethodParameter(member.Parameters))})"); // TODO bool bypassCache = false
                 }
                 else
                 {
-                    source.AppendLine($"public {(member.Async ? "async" : "")} {member.returnType} {member.Name.FirstCharToUpper()}" +
+                    source.AppendLine($"public {(member.Async ? "async" : "")} {returnType} {member.Name.FirstCharToUpper()}" +
                                       $"({string.Join(",", getMethodParameter(member.Parameters))})");
                 }
 
@@ -94,7 +96,11 @@ public static class SourceCodeGenerator
             source.Append($", {string.Join(",", member.Parameters.Select(e=>e.Name))} ");
         }
         source.Append(")");
-        if (!member.ObeyIgnoreProperties)
+        if (classToGen.HasJsonOptions)
+        {
+            source.Append(", MemoryCache_JsonOptions");
+        }
+        else if (!member.ObeyIgnoreProperties)
         {
             source.Append(", new JsonSerializerOptions{DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never}");
         }
