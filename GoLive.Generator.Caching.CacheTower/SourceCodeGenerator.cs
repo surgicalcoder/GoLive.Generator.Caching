@@ -4,7 +4,7 @@ using System.Linq;
 using GoLive.Generator.Caching.Core;
 using GoLive.Generator.Caching.Core.Model;
 using Microsoft.CodeAnalysis;
-using static GoLive.Generator.Caching.CacheTower.SourceCodeGeneratorHelper;
+using static GoLive.Generator.Caching.Core.SourceCodeGeneratorHelper;
 
 namespace GoLive.Generator.Caching.CacheTower;
 
@@ -106,7 +106,12 @@ public static class SourceCodeGenerator
         source.Append(")");
         source.Append(", memoryCacheJsonSerializerOptions");
         source.AppendLine("), async arg =>");
-        source.AppendLine($"await {member.Name}{member.returnType}({string.Join(",", member.Parameters.Select(e=>e.Name))}");
+        source.Append($"await {member.Name}");
+        if (member.IsGenericMethod)
+        {
+            source.Append($"<{member.returnType}>");
+        }
+        source.Append($"({string.Join(",", member.Parameters.Select(e => e.Name))}");
         source.Append("), new CacheSettings(");
         source.Append(GetTimeFrameValue(member.CacheDurationTimeFrame, member.CacheDuration));
         source.Append(",");

@@ -52,16 +52,20 @@ public class Scanner
                 Async = methodSymbol.IsAsync
             };
 
-            var returnType = methodSymbol.ReturnType as INamedTypeSymbol;
+            var returnType = methodSymbol.ReturnType;
 
             if (returnType is INamedTypeSymbol taskType && taskType.OriginalDefinition.ToString() == "System.Threading.Tasks.Task<TResult>")
             {
-                returnType = returnType.TypeArguments[0] as INamedTypeSymbol;
+                returnType = taskType.TypeArguments[0];
                 memberToGenerate.returnTypeUnwrappedTask = true;
-
+            }
+            else if (returnType is ITypeSymbol typeSymbol && typeSymbol.OriginalDefinition.ToString() == "System.Threading.Tasks.Task<TResult>")
+            {
+                returnType = ((INamedTypeSymbol)typeSymbol).TypeArguments[0];
+                memberToGenerate.returnTypeUnwrappedTask = true;
             }
 
-            memberToGenerate.returnType = returnType ?? methodSymbol.ReturnType;
+            memberToGenerate.returnType = returnType;
 
             var cacheAttr = attr.FirstOrDefault(e => e.AttributeClass.ToString() == "GoLive.Generator.Caching.CacheAttribute");
             memberToGenerate.CacheDuration = (int)cacheAttr.ConstructorArguments.FirstOrDefault(r => r is { Type: { SpecialType: SpecialType.System_Int32 } }).Value;

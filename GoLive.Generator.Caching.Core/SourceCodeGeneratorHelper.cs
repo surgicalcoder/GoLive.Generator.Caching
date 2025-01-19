@@ -2,12 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using GoLive.Generator.Caching.Core;
 using GoLive.Generator.Caching.Core.Model;
 using Microsoft.CodeAnalysis;
 using Resourcer;
 
-namespace GoLive.Generator.Caching.CacheTower;
+namespace GoLive.Generator.Caching.Core;
 
 public static class SourceCodeGeneratorHelper
 {
