@@ -11,7 +11,7 @@ public class MemberToGenerate
     public TimeFrame CacheDurationTimeFrame { get; set; }
     public int StaleDuration { get; set; }
     public TimeFrame StaleDurationTimeFrame { get; set; }
-    public INamedTypeSymbol returnType { get; set; }
+    public ITypeSymbol returnType { get; set; }
     public bool IsGenericMethod { get; set; }/*
     public string[] GenericConstraints { get; set; }*/
     public List<ParameterToGenerate> Parameters { get; set; }

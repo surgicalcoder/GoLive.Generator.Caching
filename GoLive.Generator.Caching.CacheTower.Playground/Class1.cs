@@ -6,7 +6,7 @@ namespace GoLive.Generator.Caching.CacheTower.Playground;
 
 public partial class Class1
 {
-    protected CacheStack MemoryCache { get; set; }
+    protected CacheStack memoryCache { get; set; }
 
 
     [Cache(3, TimeFrame.Minute, 5, TimeFrame.Minute)]

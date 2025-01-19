@@ -58,9 +58,10 @@ public class Scanner
             {
                 returnType = returnType.TypeArguments[0] as INamedTypeSymbol;
                 memberToGenerate.returnTypeUnwrappedTask = true;
+
             }
 
-            memberToGenerate.returnType = returnType;
+            memberToGenerate.returnType = returnType ?? methodSymbol.ReturnType;
 
             var cacheAttr = attr.FirstOrDefault(e => e.AttributeClass.ToString() == "GoLive.Generator.Caching.CacheAttribute");
             memberToGenerate.CacheDuration = (int)cacheAttr.ConstructorArguments.FirstOrDefault(r => r is { Type: { SpecialType: SpecialType.System_Int32 } }).Value;
@@ -71,8 +72,8 @@ public class Scanner
 
             var staleDurationTimeFrameArg = cacheAttr.ConstructorArguments.LastOrDefault(r => r is { Kind: TypedConstantKind.Enum });
             memberToGenerate.StaleDurationTimeFrame = staleDurationTimeFrameArg.IsNull ? memberToGenerate.CacheDurationTimeFrame : (TimeFrame)staleDurationTimeFrameArg.Value;
-            
-            
+
+
             if (methodSymbol.IsGenericMethod)
             {
                 memberToGenerate.IsGenericMethod = true;
@@ -80,7 +81,7 @@ public class Scanner
             }
 
             memberToGenerate.Parameters = methodSymbol.Parameters.Select(f => new ParameterToGenerate { HasDefaultValue = f.HasExplicitDefaultValue, DefaultValue = getDefaultValue(f), Name = f.Name, Type = f.Type.ToDisplayString() }).ToList();
-            
+
             yield return memberToGenerate;
         }
     }

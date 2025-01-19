@@ -59,16 +59,6 @@ public static class SourceCodeGeneratorHelper
         }
     }
 
-    /*public static string GetTypeConstraintForName(MemberToGenerate member, string prefix = "")
-    {
-        if (member.GenericConstraints == null || !member.GenericConstraints.Any())
-        {
-            return string.Empty;
-        }
-
-        return $"{prefix}{string.Join(", ", member.GenericConstraints)}";
-    }*/
-
     public static string GetTimeFrameValue(TimeFrame TimeFrame, int Value) =>
         TimeFrame switch
         {
@@ -87,37 +77,16 @@ public static class SourceCodeGeneratorHelper
             return $"where {string.Join(" and ", member.GenericParameters.Select(r => $"{r.Name} : {string.Join(",", r.Constraints)}"))}";
         }
 
-        return String.Empty;
+        return string.Empty;
     }
-
-    /*public static string GetGenericConstraintForName(MemberToGenerate member)
-    {
-        if (member.GenericParameters.Count > 0)
-        {
-            return $"where {string.Join(" and ", member.GenericParameters.Select(r => $"{r.Name} : {string.Join(",", r.Constraints)}"))}";
-        }
-
-        return String.Empty;
-    }*/
 
     public static string GetGenericParameterTypes(MemberToGenerate member, string separator)
     {
-        if (member.GenericParameters.Count > 0)
+        if (member?.GenericParameters == null || member.GenericParameters.Count == 0)
         {
-            return string.Join(separator, member.GenericParameters.Select(r => $"typeof({r.Name})"));
+            return string.Empty;
         }
 
-        return String.Empty;
+        return $"{separator}{string.Join(separator, member.GenericParameters.Select(r => $"{{typeof({r.Name})}}"))}";
     }
-
-
-    /*public static string GetTypeParametersForAsyncInvocation(MemberToGenerate member)
-    {
-        if (member.GenericTypeParameters.Any())
-        {
-            return $"<{string.Join(", ", member.GenericTypeParameters.Select(r => r.Name))}>";
-        }
-
-        return string.Empty;
-    }*/
 }

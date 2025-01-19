@@ -6,7 +6,7 @@ using GoLive.Generator.Caching.CacheTower;
 using GoLive.Generator.Caching.Core;
 using GoLive.Generator.Caching.Core.Model;
 using Microsoft.CodeAnalysis;
-using static GoLive.Generator.Caching.CacheTower.SourceCodeGeneratorHelper;
+using static GoLive.Generator.Caching.Core.SourceCodeGeneratorHelper;
 
 namespace GoLive.Generator.Caching.FusionCache;
 
