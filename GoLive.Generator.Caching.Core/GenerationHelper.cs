@@ -25,10 +25,10 @@ public static  class GenerationHelper
         }
         else
         {
-            if (!IsSimpleType(type))
-            {
+            /*if (!IsSimpleType(type))
+            {*/
                 yield return type.Name;
-            }
+           // }
         }
     }
 

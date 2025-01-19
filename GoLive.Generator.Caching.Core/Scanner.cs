@@ -43,10 +43,18 @@ public class Scanner
                 continue;
             }
             
+            
+            var returnType = methodSymbol.ReturnType as INamedTypeSymbol;
+
+            if (returnType is INamedTypeSymbol taskType && taskType.OriginalDefinition.ToString() == "System.Threading.Tasks.Task<TResult>")
+            {
+                returnType = returnType.TypeArguments[0] as INamedTypeSymbol;
+            }
+
             var memberToGenerate = new MemberToGenerate
             {
                 Name = methodSymbol.Name,
-                returnType = methodSymbol.ReturnType as INamedTypeSymbol,
+                returnType = returnType,
                 Async = methodSymbol.IsAsync
             };
 

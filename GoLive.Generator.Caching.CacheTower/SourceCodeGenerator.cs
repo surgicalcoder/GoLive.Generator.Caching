@@ -85,7 +85,7 @@ public static class SourceCodeGenerator
     private static void handleAsync(SourceStringBuilder source, ClassToGenerate classToGen, MemberToGenerate member)
     {
         source.Append("return await MemoryCache.GetOrSetAsync");
-        source.Append(GenerationHelper.GetTypeParametersForAsyncInvocation(member));
+        source.Append($"<{member.returnType}>");
         source.AppendLine(2);
         source.Append("(JsonSerializer.Serialize(");
         source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e=>e.Type))}> (\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}\" ");

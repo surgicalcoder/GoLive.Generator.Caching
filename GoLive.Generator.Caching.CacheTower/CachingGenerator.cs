@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using GoLive.Generator.Caching.Core;
-using GoLive.Generator.Caching.Core.EmbeddedResources;
 using GoLive.Generator.Caching.Core.Model;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -37,7 +36,7 @@ public class CachingGenerator : IIncrementalGenerator
     
     private void AddAdditionalFiles(IncrementalGeneratorPostInitializationContext context)
     {
-        context.AddSource("_additionalfiles.g.cs",  ThisAssembly.Resources._Resources.AdditionalFiles.Text);
+        context.AddSource("_additionalfiles.g.cs", SourceCodeGeneratorHelper.GetEmbeddedResourceContents());
     }
     
     

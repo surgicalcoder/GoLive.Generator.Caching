@@ -2,11 +2,16 @@
 using System.Collections.Generic;
 using GoLive.Generator.Caching.Core;
 using GoLive.Generator.Caching.Core.Model;
+using Resourcer;
 
 namespace GoLive.Generator.Caching.CacheTower;
 
 public static class SourceCodeGeneratorHelper
 {
+    public static string GetEmbeddedResourceContents()
+    {
+        return Resource.AsString("GoLive.Generator.Caching.Core.Resources.AdditionalFiles.cs");
+    }
     public static string getCommaIfParameters(IList member)
     {
         return (member.Count > 0 ? "," : "" );
