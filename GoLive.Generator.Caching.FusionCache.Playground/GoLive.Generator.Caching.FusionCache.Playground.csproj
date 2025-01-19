@@ -6,14 +6,22 @@
         <Nullable>enable</Nullable>
         <PublishRepositoryUrl>false</PublishRepositoryUrl>
         <IsPackable>false</IsPackable>
+	    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+	    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="ZiggyCreatures.FusionCache" Version="1.4.1" />
+      <PackageReference Include="System.Text.Json" Version="9.0.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\GoLive.Generator.Caching.FusionCache\GoLive.Generator.Caching.FusionCache.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\GoLive.Generator.Caching.FusionCache\GoLive.Generator.Caching.FusionCache.csproj"  		                  
+                        OutputItemType="Analyzer"
+                        ReferenceOutputAssembly="true">
+	      <PrivateAssets>all</PrivateAssets>
+	      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </ProjectReference>
     </ItemGroup>
 
 </Project>

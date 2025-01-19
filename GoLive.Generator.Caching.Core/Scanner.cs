@@ -23,7 +23,7 @@ public class Scanner
         retr.Members = ConvertToMembers(classSymbol).ToList();
 
         retr.HasJsonOptions = classSymbol.GetMembers().OfType<IFieldSymbol>()
-            .Any(f => f.Type.ToDisplayString() == "System.Text.Json.JsonSerializerOptions" && f.Name == "MemoryCache_JsonOptions");
+            .Any(f => f.Type.ToDisplayString() == "System.Text.Json.JsonSerializerOptions" && f.Name == "memoryCacheJsonSerializerOptions");
 
         return retr;
     }
@@ -72,19 +72,59 @@ public class Scanner
             var staleDurationTimeFrameArg = cacheAttr.ConstructorArguments.LastOrDefault(r => r is { Kind: TypedConstantKind.Enum });
             memberToGenerate.StaleDurationTimeFrame = staleDurationTimeFrameArg.IsNull ? memberToGenerate.CacheDurationTimeFrame : (TimeFrame)staleDurationTimeFrameArg.Value;
             
-            memberToGenerate.ObeyIgnoreProperties = (bool)cacheAttr.ConstructorArguments.LastOrDefault(r => r is { Type: { SpecialType: SpecialType.System_Boolean } }).Value;
             
             if (methodSymbol.IsGenericMethod)
             {
                 memberToGenerate.IsGenericMethod = true;
-                memberToGenerate.GenericConstraints = methodSymbol.TypeParameters.Select(e => e.Name).ToArray(); 
+                memberToGenerate.GenericParameters = GetGenericParameters(methodSymbol);
             }
 
             memberToGenerate.Parameters = methodSymbol.Parameters.Select(f => new ParameterToGenerate { HasDefaultValue = f.HasExplicitDefaultValue, DefaultValue = getDefaultValue(f), Name = f.Name, Type = f.Type.ToDisplayString() }).ToList();
-            memberToGenerate.GenericTypeParameters = methodSymbol.TypeParameters.Select(f => new ParameterToGenerate { Name = f.Name }).ToList(); // TODO Change to List<String> at one point
             
             yield return memberToGenerate;
         }
+    }
+    private static List<GenericParameter> GetGenericParameters(IMethodSymbol methodSymbol)
+    {
+        var genericParameters = new List<GenericParameter>();
+
+        foreach (var typeParameter in methodSymbol.TypeParameters)
+        {
+            var genericParameter = new GenericParameter
+            {
+                Name = typeParameter.Name,
+                Constraints = typeParameter.ConstraintTypes.Select(c => c.ToDisplayString()).ToList()
+            };
+
+            if (typeParameter.HasConstructorConstraint)
+            {
+                genericParameter.Constraints.Add("new()");
+            }
+
+            if (typeParameter.HasReferenceTypeConstraint)
+            {
+                genericParameter.Constraints.Add("class");
+            }
+
+            if (typeParameter.HasValueTypeConstraint)
+            {
+                genericParameter.Constraints.Add("struct");
+            }
+
+            if (typeParameter.HasNotNullConstraint)
+            {
+                genericParameter.Constraints.Add("notnull");
+            }
+
+            if (typeParameter.HasUnmanagedTypeConstraint)
+            {
+                genericParameter.Constraints.Add("unmanaged");
+            }
+
+            genericParameters.Add(genericParameter);
+        }
+
+        return genericParameters;
     }
 
     private static string getDefaultValue(IParameterSymbol f)
