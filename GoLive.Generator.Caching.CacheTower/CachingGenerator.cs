@@ -1,4 +1,7 @@
 ﻿using System.Collections.Immutable;
+using GoLive.Generator.Caching.Core;
+using GoLive.Generator.Caching.Core.EmbeddedResources;
+using GoLive.Generator.Caching.Core.Model;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -34,14 +37,14 @@ public class CachingGenerator : IIncrementalGenerator
     
     private void AddAdditionalFiles(IncrementalGeneratorPostInitializationContext context)
     {
-        context.AddSource("_additionalfiles.g.cs", ThisAssembly.Resources._Resources.AdditionalFiles.Text);
+        context.AddSource("_additionalfiles.g.cs",  ThisAssembly.Resources._Resources.AdditionalFiles.Text);
     }
     
     
     private static INamedTypeSymbol GetDeclarations(GeneratorSyntaxContext context)
     {
         var classDeclarationSyntax = (ClassDeclarationSyntax)context.Node;
-        var symbol = ModelExtensions.GetDeclaredSymbol(context.SemanticModel, classDeclarationSyntax);
+        var symbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
         return symbol as INamedTypeSymbol;
     }
 }

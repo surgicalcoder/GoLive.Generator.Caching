@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GoLive.Generator.Caching.CacheTower;
+namespace GoLive.Generator.Caching.Core.Model;
 
 public class ClassToGenerate
 {

@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using GoLive.Generator.Caching.Core.Model;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace GoLive.Generator.Caching.CacheTower;
+namespace GoLive.Generator.Caching.Core;
 
 public class Scanner
 {
@@ -37,7 +38,7 @@ public class Scanner
 
             var attr = methodSymbol.GetAttributes();
 
-            if (!attr.Any(e => e.AttributeClass.ToString() == "GoLive.Generator.Caching.CacheTower.CacheAttribute"))
+            if (!attr.Any(e => e.AttributeClass.ToString() == "GoLive.Generator.Caching.CacheAttribute"))
             {
                 continue;
             }
@@ -49,11 +50,16 @@ public class Scanner
                 Async = methodSymbol.IsAsync
             };
 
-            var cacheAttr = attr.FirstOrDefault(e => e.AttributeClass.ToString() == "GoLive.Generator.Caching.CacheTower.CacheAttribute");
+            var cacheAttr = attr.FirstOrDefault(e => e.AttributeClass.ToString() == "GoLive.Generator.Caching.CacheAttribute");
             memberToGenerate.CacheDuration = (int)cacheAttr.ConstructorArguments.FirstOrDefault(r => r is { Type: { SpecialType: SpecialType.System_Int32 } }).Value;
             memberToGenerate.CacheDurationTimeFrame = (TimeFrame)cacheAttr.ConstructorArguments.FirstOrDefault(r => r is { Kind: TypedConstantKind.Enum }).Value;
-            memberToGenerate.StaleDuration = (int)cacheAttr.ConstructorArguments.LastOrDefault(r => r is { Type: { SpecialType: SpecialType.System_Int32 } }).Value;
-            memberToGenerate.StaleDurationTimeFrame = (TimeFrame)cacheAttr.ConstructorArguments.LastOrDefault(r => r is { Kind: TypedConstantKind.Enum }).Value;
+
+            var staleDurationArg = cacheAttr.ConstructorArguments.LastOrDefault(r => r is { Type: { SpecialType: SpecialType.System_Int32 } });
+            memberToGenerate.StaleDuration = staleDurationArg.IsNull ? memberToGenerate.CacheDuration * 2 : (int)staleDurationArg.Value;
+
+            var staleDurationTimeFrameArg = cacheAttr.ConstructorArguments.LastOrDefault(r => r is { Kind: TypedConstantKind.Enum });
+            memberToGenerate.StaleDurationTimeFrame = staleDurationTimeFrameArg.IsNull ? memberToGenerate.CacheDurationTimeFrame : (TimeFrame)staleDurationTimeFrameArg.Value;
+            
             memberToGenerate.ObeyIgnoreProperties = (bool)cacheAttr.ConstructorArguments.LastOrDefault(r => r is { Type: { SpecialType: SpecialType.System_Boolean } }).Value;
             
             if (methodSymbol.IsGenericMethod)

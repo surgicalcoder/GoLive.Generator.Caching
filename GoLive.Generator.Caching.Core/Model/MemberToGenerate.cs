@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
-namespace GoLive.Generator.Caching.CacheTower;
+namespace GoLive.Generator.Caching.Core.Model;
 
 public class MemberToGenerate
 {

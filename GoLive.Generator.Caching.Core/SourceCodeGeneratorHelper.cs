@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using GoLive.Generator.Caching.Core;
+using GoLive.Generator.Caching.Core.Model;
 
 namespace GoLive.Generator.Caching.CacheTower;
 
