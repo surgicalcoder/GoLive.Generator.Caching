@@ -14,9 +14,9 @@
     </ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\GoLive.Generator.Caching.CacheTower\GoLive.Generator.Caching.CacheTower.csproj" 
-		                  OutputItemType="Analyzer" 
-		                  ReferenceOutputAssembly="false">
+		<ProjectReference Include="..\GoLive.Generator.Caching.CacheTower\GoLive.Generator.Caching.CacheTower.csproj"
+		                  OutputItemType="Analyzer"
+		                  ReferenceOutputAssembly="true">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</ProjectReference>

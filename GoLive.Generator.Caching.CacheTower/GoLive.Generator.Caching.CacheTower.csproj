@@ -1,56 +1,62 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<IsRoslynComponent>true</IsRoslynComponent>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<DevelopmentDependency>true</DevelopmentDependency>
 
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <LangVersion>latest</LangVersion>
-        <PackOnBuild>true</PackOnBuild>
-        <PackFolder>analyzers\cs</PackFolder>
-        <IsRoslynComponent>true</IsRoslynComponent>
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
-        <IncludeBuildOutput>true</IncludeBuildOutput>
-        <DevelopmentDependency>true</DevelopmentDependency>
+		<!-- Package Metadata -->
+		<PackageId>GoLive.Generator.Caching.CacheTower</PackageId>
+		<Authors>SurgicalCoder</Authors>
+		<Company>N/A</Company>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Description>Auto generate wrappers for caching - for using with CacheTower</Description>
+		<Copyright>Copyright 2024 - 2025 - SurgicalCoder</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<GenerateRepositoryUrlAttribute>true</GenerateRepositoryUrlAttribute>
+		<PackageProjectUrl>https://github.com/surgicalcoder/GoLive.Generator.Caching</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/surgicalcoder/GoLive.Generator.Caching</RepositoryUrl>
 
-        <PackageId>GoLive.Generator.Caching.CacheTower</PackageId>
-        <Authors>SurgicalCoder</Authors>
-        <Company>N/A</Company>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Description>Auto generate wrappers for caching - for using with CacheTower</Description>
-        <Copyright>Copyright 2024 - 2025 - SurgicalCoder</Copyright>
-        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        <GenerateRepositoryUrlAttribute>true</GenerateRepositoryUrlAttribute>
-        <PackOnBuild>true</PackOnBuild>
-        <PackFolder>analyzers\cs</PackFolder>
-        <IsRoslynComponent>true</IsRoslynComponent>
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
-        <IncludeBuildOutput>false</IncludeBuildOutput>
-        <DevelopmentDependency>true</DevelopmentDependency>
-        <PackageProjectUrl>https://github.com/surgicalcoder/GoLive.Generator.Caching</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/surgicalcoder/GoLive.Generator.Caching</RepositoryUrl>
-    </PropertyGroup>
+		<!-- Build and Dependencies -->
+		<GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
+	</PropertyGroup>
+
+	<!-- Package Contents -->
 	<ItemGroup>
 		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 		<None Include="$(OutputPath)\GoLive.Generator.Caching.Core.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 	</ItemGroup>
-	<PropertyGroup>
-		<!-- Ensure the generator and dependencies are copied to output -->
-		<GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
-	</PropertyGroup>
+
+	<!-- NuGet Package References -->
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.12.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
+	</ItemGroup>
+
+	<!-- Project References -->
+	<ItemGroup>
+		<ProjectReference Include="..\GoLive.Generator.Caching.Core\GoLive.Generator.Caching.Core.csproj"
+                          Private="true"
+                          PrivateAssets="all"
+                          GeneratePathProperty="true" />
+	</ItemGroup>
+
+	<!-- Target for ensuring dependencies are available -->
 	<Target Name="GetDependencyTargetPaths">
 		<ItemGroup>
 			<TargetPathWithTargetPlatformMoniker Include="$(OutputPath)\GoLive.Generator.Caching.Core.dll" IncludeRuntimeDependency="false" />
 		</ItemGroup>
 	</Target>
-    <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.12.0" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
-    </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\GoLive.Generator.Caching.Core\GoLive.Generator.Caching.Core.csproj" PrivateAssets="all" />
-    </ItemGroup>
 
+	<!-- Target for copying dependencies -->
+	<Target Name="CopyDependencies" BeforeTargets="Build">
+		<Copy SourceFiles="$(OutputPath)\GoLive.Generator.Caching.Core.dll"
+              DestinationFolder="$(OutputPath)"
+              SkipUnchangedFiles="true" />
+	</Target>
 </Project>
