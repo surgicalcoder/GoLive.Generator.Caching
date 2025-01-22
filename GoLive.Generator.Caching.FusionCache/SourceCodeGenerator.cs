@@ -34,17 +34,21 @@ public static class SourceCodeGenerator
 
             foreach (var member in classToGen.Members)
             {
+                string returnType = member.returnTypeUnwrappedTask ? $"Task<{member.returnType.ToDisplayString()}>" : member.returnType.ToDisplayString();
+
                 if (member.IsGenericMethod)
                 {
-                    source.AppendLine($"public {(member.Async ? "async" : "")} {member.returnType} {member.Name.FirstCharToUpper()}" +
-                                      $"<{string.Join(",", member.GenericConstraints)}>" +
+                    source.AppendLine($"public {(member.Async ? "async" : "")} {returnType} {member.Name.FirstCharToUpper()}" +
+                                      $"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>" +
                                       $"({string.Join(",", getMethodParameter(member.Parameters))})"); // TODO bool bypassCache = false
                 }
                 else
                 {
-                    source.AppendLine($"public {(member.Async ? "async" : "")} {member.returnType} {member.Name.FirstCharToUpper()}" +
+                    source.AppendLine($"public {(member.Async ? "async" : "")} {returnType} {member.Name.FirstCharToUpper()}" +
                                       $"({string.Join(",", getMethodParameter(member.Parameters))})");
                 }
+
+                source.Append(GetGenericConstraints(member));
 
                 using (source.CreateBracket())
                 {
@@ -60,89 +64,122 @@ public static class SourceCodeGenerator
 
                 if (member.IsGenericMethod)
                 {
-                    source.AppendLine($"public void {member.Name.FirstCharToUpper()}_EvictCache" +
-                                      $"<{string.Join(",", member.GenericConstraints)}>" +
+                    source.AppendLine($"public async Task {member.Name.FirstCharToUpper()}_EvictCache" +
+                                      $"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>" +
                                       $"({string.Join(",", getMethodParameter(member.Parameters))})");
                 }
                 else
                 {
-                    source.AppendLine($"public void {member.Name.FirstCharToUpper()}_EvictCache" +
+                    source.AppendLine($"public async Task {member.Name.FirstCharToUpper()}_EvictCache" +
                                       $"({string.Join(",", getMethodParameter(member.Parameters))})");
                 }
 
-                using (source.CreateBracket())
-                {
-                    source.AppendLine("MemoryCache.Remove(");
-                    source.Append("(JsonSerializer.Serialize(");
-                    source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> (\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}\" ");
-                    if (member.Parameters.Count > 0)
-                    {
-                        source.Append($", {string.Join(",", member.Parameters.Select(e => e.Name))} ");
-                    }
-                    source.Append(")");
+                source.Append(GetGenericConstraints(member));
 
-                    source.Append(", memoryCacheJsonSerializerOptions");
-                    
-                    source.Append(")");
-                    source.Append(")");
-                    source.AppendLine(");");
-                }
+                handleEvictCache(source, classToGen, member);
             }
+        }
+    }
+
+    private static void handleEvictCache(SourceStringBuilder source, ClassToGenerate classToGen, MemberToGenerate member)
+    {
+        using (source.CreateBracket())
+        {
+            source.AppendLine("memoryCache.Remove(");
+            source.Append("(JsonSerializer.Serialize(");
+            source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> (\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}\" ");
+            if (member.Parameters.Count > 0)
+            {
+                source.Append($", {string.Join(",", member.Parameters.Select(e => e.Name))} ");
+            }
+            source.Append(")");
+
+            source.Append(", memoryCacheJsonSerializerOptions");
+                    
+            source.Append(")");
+            source.Append(")");
+            source.AppendLine(");");
         }
     }
 
     private static void handleAsync(SourceStringBuilder source, ClassToGenerate classToGen, MemberToGenerate member)
     {
-        source.Append("return await MemoryCache.GetOrSetAsync");
+        source.Append("return await memoryCache.GetOrSetAsync");
         source.Append($"<{member.returnType}>");
         source.AppendLine(2);
-        
-        source.Append("(JsonSerializer.Serialize(");
-        source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",",member.Parameters.Select(e=>e.Type))}> (\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}\" ");
-        if (member.Parameters.Count > 0)
+        using (source.CreateParentheses())
         {
-            source.Append($", {string.Join(",", member.Parameters.Select(e=>e.Name))} ");
+            using (source.CreateParentheses("JsonSerializer.Serialize"))
+            {
+                source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> ");
+
+                using (source.CreateParentheses())
+                {
+                    source.Append($"$\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}{GetGenericParameterTypes(member, "_")}\" ");
+
+                    if (member.Parameters.Count > 0)
+                    {
+                        source.Append($", {string.Join(",", member.Parameters.Select(e => e.Name))} ");
+                    }
+                }
+
+                source.Append(", memoryCacheJsonSerializerOptions");
+            }
+            source.Append(", async arg =>");
+            source.Append($"await {member.Name}");
+
+            if (member.IsGenericMethod)
+            {
+                source.Append($"<{member.returnType}>");
+            }
+
+            using (source.CreateParentheses())
+            {
+                source.Append($"{string.Join(",", member.Parameters.Select(e => e.Name))}");
+            }
+            source.Append(", ");
+            source.Append(GetTimeFrameValue(member.CacheDurationTimeFrame, member.CacheDuration));
         }
-        source.Append(")");
-        
-        source.Append(", memoryCacheJsonSerializerOptions");
-        
-        source.AppendLine(")");
-        
-        source.Append(", async _ =>");
-        using (source.CreateBracket())
-        {
-            source.AppendLine($"return await {member.Name}{GetTypeParametersForAsyncInvocation(member)}({string.Join(",", member.Parameters.Select(e => e.Name))}");
-            source.AppendLine(");");
-        }
-        source.Append(GetTimeFrameValue(member.CacheDurationTimeFrame, member.CacheDuration));
-        source.Append(");");
+
+        source.Append(";");
     }
 
     private static void handleSync(SourceStringBuilder source, ClassToGenerate classToGen, MemberToGenerate member)
     {
-        source.Append("return MemoryCache.GetOrSet");
+        source.Append("return memoryCache.GetOrSet");
         source.Append($"<{member.returnType}>");
         source.AppendLine(2);
-        
-        source.Append("(JsonSerializer.Serialize(");
-        source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",",member.Parameters.Select(e=>e.Type))}> (\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}\" ");
-        if (member.Parameters.Count > 0)
+        using (source.CreateParentheses())
         {
-            source.Append($", {string.Join(",", member.Parameters.Select(e=>e.Name))} ");
+            using (source.CreateParentheses("JsonSerializer.Serialize"))
+            {
+                source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> ");
+
+                using (source.CreateParentheses())
+                {
+                    source.Append($"$\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}{GetGenericParameterTypes(member, "_")}\" ");
+
+                    if (member.Parameters.Count > 0)
+                    {
+                        source.Append($", {string.Join(",", member.Parameters.Select(e => e.Name))} ");
+                    }
+                }
+
+                source.Append(", memoryCacheJsonSerializerOptions");
+            }
+            source.Append(", _ =>");
+            using (source.CreateBracket())
+            {
+                source.AppendLine($"return {member.Name}({string.Join(",", member.Parameters.Select(e => e.Name))}");
+                source.AppendLine(");");
+            }
+            source.Append(", ");
+            
+            source.Append(GetTimeFrameValue(member.CacheDurationTimeFrame, member.CacheDuration));
         }
-        source.Append(")");
-        source.AppendLine(")");
-        
-        source.Append(", _ =>");
-        using (source.CreateBracket())
-        {
-            source.AppendLine($"return {member.Name}({string.Join(",", member.Parameters.Select(e => e.Name))}");
-            source.AppendLine(");");
-        }
-        source.Append(", ");
-        source.Append(GetTimeFrameValue(member.CacheDurationTimeFrame, member.CacheDuration));
-        source.Append(");");
-    }    
-    
+
+        source.Append(";");
+    }
+
+
 }

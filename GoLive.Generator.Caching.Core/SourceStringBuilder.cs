@@ -42,6 +42,15 @@ public class SourceStringBuilder
     public int IndentLevel = 0;
     private readonly StringBuilder _stringBuilder = new();
 
+    public SourceStringBuilderParentheses CreateParentheses(string input = null)
+    {
+        if (!string.IsNullOrEmpty(input))
+        {
+            Append(input);
+        }
+        return new SourceStringBuilderParentheses(this);
+    }
+
     public SourceStringBuilderBracket CreateBracket()
     {
         return new SourceStringBuilderBracket(this);

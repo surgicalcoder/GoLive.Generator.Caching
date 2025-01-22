@@ -71,7 +71,12 @@ public static class SourceCodeGeneratorHelper
 
     public static string GetGenericConstraints(MemberToGenerate member)
     {
-        if (member.GenericParameters.Count > 0)
+        if (member.GenericParameters.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        if (member.GenericParameters.SelectMany(r=>r.Constraints).Any())
         {
             return $"where {string.Join(" and ", member.GenericParameters.Select(r => $"{r.Name} : {string.Join(",", r.Constraints)}"))}";
         }

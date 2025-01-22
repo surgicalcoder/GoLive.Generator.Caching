@@ -38,14 +38,14 @@ public static class SourceCodeGenerator
                     source.AppendLine($"public {(member.Async ? "async" : "")} {returnType} {member.Name.FirstCharToUpper()}" +
                                       $"<{string.Join(",", member.GenericParameters.Select(r=>r.Name))}>" +
                                       $"({string.Join(",", getMethodParameter(member.Parameters))})"); // TODO bool bypassCache = false
-
-                    source.Append(GetGenericConstraints(member));
                 }
                 else
                 {
                     source.AppendLine($"public {(member.Async ? "async" : "")} {returnType} {member.Name.FirstCharToUpper()}" +
                                       $"({string.Join(",", getMethodParameter(member.Parameters))})");
                 }
+
+                source.Append(GetGenericConstraints(member));
 
                 using (source.CreateBracket())
                 {
@@ -58,14 +58,14 @@ public static class SourceCodeGenerator
                     source.AppendLine($"public async Task {member.Name.FirstCharToUpper()}_EvictCache" +
                                       $"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>" +
                                       $"({string.Join(",", getMethodParameter(member.Parameters))})");
-
-                    source.Append(GetGenericConstraints(member));
                 }
                 else
                 {
                     source.AppendLine($"public async Task {member.Name.FirstCharToUpper()}_EvictCache" +
                                       $"({string.Join(",", getMethodParameter(member.Parameters))})");
                 }
+
+                source.Append(GetGenericConstraints(member));
 
                 using (source.CreateBracket())
                 {
@@ -96,27 +96,48 @@ public static class SourceCodeGenerator
         source.Append("return await memoryCache.GetOrSetAsync");
         source.Append($"<{member.returnType}>");
         source.AppendLine(2);
-        source.Append("(JsonSerializer.Serialize(");
-        source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e=>e.Type))}> " +
-                      $"($\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}{GetGenericParameterTypes(member, "_")}\" ");
-        if (member.Parameters.Count > 0)
+        using (source.CreateParentheses())
         {
-            source.Append($", {string.Join(",", member.Parameters.Select(e=>e.Name))} ");
+            source.Append("JsonSerializer.Serialize");
+            using (source.CreateParentheses())
+            {
+                source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> ");
+
+                using (source.CreateParentheses())
+                {
+                    source.Append($"$\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}{GetGenericParameterTypes(member, "_")}\" ");
+
+                    if (member.Parameters.Count > 0)
+                    {
+                        source.Append($", {string.Join(",", member.Parameters.Select(e => e.Name))} ");
+                    }
+                }
+
+                source.Append(", memoryCacheJsonSerializerOptions");
+            }
+            source.Append(", async arg =>");
+            source.Append($"await {member.Name}");
+
+            if (member.IsGenericMethod)
+            {
+                source.Append($"<{member.returnType}>");
+            }
+
+            using (source.CreateParentheses())
+            {
+                source.Append($"{string.Join(",", member.Parameters.Select(e => e.Name))}");
+            }
+
+            source.Append(", new CacheSettings");
+            using (source.CreateParentheses())
+            {
+                source.Append(GetTimeFrameValue(member.CacheDurationTimeFrame, member.CacheDuration));
+                source.Append(",");
+                source.Append(GetTimeFrameValue(member.StaleDurationTimeFrame, member.StaleDuration));
+            }
         }
-        source.Append(")");
-        source.Append(", memoryCacheJsonSerializerOptions");
-        source.AppendLine("), async arg =>");
-        source.Append($"await {member.Name}");
-        if (member.IsGenericMethod)
-        {
-            source.Append($"<{member.returnType}>");
-        }
-        source.Append($"({string.Join(",", member.Parameters.Select(e => e.Name))}");
-        source.Append("), new CacheSettings(");
-        source.Append(GetTimeFrameValue(member.CacheDurationTimeFrame, member.CacheDuration));
-        source.Append(",");
-        source.Append(GetTimeFrameValue(member.StaleDurationTimeFrame, member.StaleDuration));
-        source.Append("));");
+
+        source.Append(";");
     }
 
 }

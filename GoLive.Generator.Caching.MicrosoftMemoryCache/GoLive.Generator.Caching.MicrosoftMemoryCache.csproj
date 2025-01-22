@@ -16,7 +16,7 @@
         <Company>N/A</Company>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Description>Auto generate wrappers for caching - for using with Microsoft's  Microsoft.Extensions.Caching.Memory.IMemoryCache / Microsoft.Extensions.Caching.Abstractions</Description>
-        <Copyright>Copyright 2024 - SurgicalCoder</Copyright>
+        <Copyright>Copyright 2024 - 2025 - SurgicalCoder</Copyright>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -31,19 +31,26 @@
         <PackageProjectUrl>https://github.com/surgicalcoder/GoLive.Generator.Caching</PackageProjectUrl>
         <RepositoryUrl>https://github.com/surgicalcoder/GoLive.Generator.Caching</RepositoryUrl>
     </PropertyGroup>
-    <ItemGroup>
-        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
-        <PackageReference Include="ThisAssembly.Resources" Version="2.0.10">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Remove="Resources\AdditionalFiles.cs" />
-        <EmbeddedResource Include="Resources\AdditionalFiles.cs" />
-    </ItemGroup>
+	<ItemGroup>
+		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Costura.Fody" Version="6.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive; compile</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Fody" Version="6.9.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive; compile</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.12.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\GoLive.Generator.Caching.Core\GoLive.Generator.Caching.Core.csproj" Private="true" PrivateAssets="all" GeneratePathProperty="true" />
+	</ItemGroup>
 
 </Project>

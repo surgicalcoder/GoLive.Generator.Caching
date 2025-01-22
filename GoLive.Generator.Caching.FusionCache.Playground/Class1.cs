@@ -1,10 +1,12 @@
-﻿using ZiggyCreatures.Caching.Fusion;
+﻿using Microsoft.Extensions.Caching.Memory;
+using System.Text.Json;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace GoLive.Generator.Caching.FusionCache.Playground;
 
 public partial class c1
 {
-    protected IFusionCache MemoryCache { get; set; }
+    protected IFusionCache memoryCache { get; set; }
     
     [Cache(3, TimeFrame.Minute)]
     private string getValue()
@@ -31,7 +33,7 @@ public partial class c1
     }
     
     [Cache(3, TimeFrame.Minute)]
-    private async Task<T> getAsync3<T>(string SingleInput)
+    private async Task<T> getAsync3<T>(string SingleInput) where T : c1
     {
         return default(T);
     }

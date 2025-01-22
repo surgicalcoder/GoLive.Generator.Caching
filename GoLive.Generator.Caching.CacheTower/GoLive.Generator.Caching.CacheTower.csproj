@@ -22,12 +22,10 @@
 		<RepositoryUrl>https://github.com/surgicalcoder/GoLive.Generator.Caching</RepositoryUrl>
 	</PropertyGroup>
 
-	<!-- Package Contents -->
 	<ItemGroup>
 		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 	</ItemGroup>
 
-	<!-- NuGet Package References -->
 	<ItemGroup>
 		<PackageReference Include="Costura.Fody" Version="6.0.0">
 		  <PrivateAssets>all</PrivateAssets>
@@ -42,7 +40,6 @@
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
 	</ItemGroup>
 
-	<!-- Project References -->
 	<ItemGroup>
 		<ProjectReference Include="..\GoLive.Generator.Caching.Core\GoLive.Generator.Caching.Core.csproj" Private="true" PrivateAssets="all" GeneratePathProperty="true" />
 	</ItemGroup>
