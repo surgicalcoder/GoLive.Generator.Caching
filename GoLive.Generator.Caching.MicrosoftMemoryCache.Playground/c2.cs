@@ -4,7 +4,7 @@ namespace GoLive.Generator.Caching.MicrosoftMemoryCache.Playground;
 
 public class c2
 {
-    protected IMemoryCache MemoryCache { get; set; }
+    protected IMemoryCache memoryCache { get; set; }
     
     private async Task<string> getAsyncValue(string Input1, string wibble = "blarg")
     {
@@ -13,7 +13,7 @@ public class c2
     
     public async System.Threading.Tasks.Task<string> GetAsyncValue(string Input1, string wibble = "blarg")
     {
-        return (await MemoryCache.GetOrCreateAsync(new Tuple<string, string, string>("GoLive.Generator.Caching.MicrosoftMemoryCache.Playground.Class1.getAsyncValue", Input1, wibble), async entry =>
+        return (await memoryCache.GetOrCreateAsync(new Tuple<string, string, string>("GoLive.Generator.Caching.MicrosoftMemoryCache.Playground.Class1.getAsyncValue", Input1, wibble), async entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3);
 

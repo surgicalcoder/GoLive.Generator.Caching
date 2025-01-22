@@ -92,7 +92,7 @@ public static class SourceCodeGenerator
 
     private static void handleAsync(SourceStringBuilder source, ClassToGenerate classToGen, MemberToGenerate member)
     {
-        source.Append("return await MemoryCache.GetOrCreateAsync(");
+        source.Append("return await memoryCache.GetOrCreateAsync(");
         source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> (\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}\" ");
 
         if (member.Parameters.Count > 0)
@@ -109,7 +109,6 @@ public static class SourceCodeGenerator
             source.Append(GetTimeFrameValue(member.CacheDurationTimeFrame, member.CacheDuration));
             source.AppendLine(";");
             source.AppendLine($"return ");
-            // {member.Name}{getTypeParametersForAsyncInvocation(member)}({string.Join(",", member.Parameters.Select(e => e.Name))});
 
             source.Append($"await {member.Name}");
 
@@ -129,8 +128,8 @@ public static class SourceCodeGenerator
 
     private static void handleSync(SourceStringBuilder source, ClassToGenerate classToGen, MemberToGenerate member)
     {
-        source.Append($"Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",",member.Parameters.Select(e=>e.Type))}> cacheKey = " +
-                      $"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",",member.Parameters.Select(e=>e.Type))}>" +
+        source.Append($"Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> cacheKey = " +
+                      $"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}>" +
                       $"(\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}\"");
 
         if (member.Parameters.Count > 0)
@@ -141,7 +140,7 @@ public static class SourceCodeGenerator
         source.AppendLine(");");
         source.AppendLine(2);
             
-        source.AppendLine($@"if (MemoryCache.TryGetValue(cacheKey, out {member.returnType} value))
+        source.AppendLine($@"if (memoryCache.TryGetValue(cacheKey, out {member.returnType} value))
         {{
             return value;
         }}");
@@ -149,7 +148,7 @@ public static class SourceCodeGenerator
         source.AppendLine(2);
             
         source.AppendLine($"value = {member.Name}({string.Join(",", member.Parameters.Select(e=>e.Name))});");
-        source.AppendLine($"MemoryCache.Set<{member.returnType}>(cacheKey, value);");
+        source.AppendLine($"memoryCache.Set<{member.returnType}>(cacheKey, value);");
         source.AppendLine("return value;");
     }
 }

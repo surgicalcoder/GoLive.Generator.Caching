@@ -4,7 +4,7 @@ namespace GoLive.Generator.Caching.MicrosoftMemoryCache.Playground;
 
 public partial class Class1
 {
-    protected IMemoryCache MemoryCache { get; set; }
+    protected IMemoryCache memoryCache { get; set; }
     
     [Cache(3, TimeFrame.Minute)]
     private string getValue()
