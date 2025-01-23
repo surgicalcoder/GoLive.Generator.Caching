@@ -3,6 +3,8 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <LangVersion>latest</LangVersion>
+        <PublishRepositoryUrl>false</PublishRepositoryUrl>
+        <IsPackable>false</IsPackable>
     </PropertyGroup>
     
     <ItemGroup>
