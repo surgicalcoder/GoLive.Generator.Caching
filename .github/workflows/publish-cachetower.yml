@@ -5,22 +5,24 @@ on:
 jobs:
   publish:
     env:
-     CacheTowerProject: 'GoLive.Generator.Caching.CacheTower/GoLive.Generator.Caching.CacheTower.csproj'
-     BUILD_VER : '1.2'
+     SOLUTION: 'GoLive.Generator.Caching.CacheTower/GoLive.Generator.Caching.CacheTower.csproj'
+     BUILD_VER : '2.0'
     name: build, pack & publish
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 7.0.x
+          dotnet-version: 9.0.x
       - name: Setup NuGet
-        uses: nuget/setup-nuget@v1
+        uses: nuget/setup-nuget@v2
+        with:
+          nuget-api-key: ${{secrets.NUGET_KEY}}
       - name: Get Build Version
         run: |
-          echo "BUILD_VERSION=${{ format('{0}.{1}', env.BUILD_VER, github.run_number ) }}" >> $GITHUB_ENV
+          echo "BUILD_VERSION=${{ format('{0}.{1}', env.BUILD_VER, github.run_number ) }}" >> $env:GITHUB_ENV
       - name: Build
-        run: dotnet pack $CacheTowerProject --configuration Release -p:Version=$BUILD_VERSION -p:PackageVersion=$BUILD_VERSION -p:GeneratePackageOnBuild=false
+        run: dotnet pack $SOLUTION --configuration Release -p:Version=$env:BUILD_VERSION -p:PackageVersion=$env:BUILD_VERSION -p:GeneratePackageOnBuild=false
       - name: Publish
-        run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_KEY}}
+        run: nuget push **/*.nupkg -Source 'https://api.nuget.org/v3/index.json' 
