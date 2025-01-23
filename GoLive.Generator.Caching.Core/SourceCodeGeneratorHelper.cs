@@ -71,7 +71,7 @@ public static class SourceCodeGeneratorHelper
 
     public static string GetGenericConstraints(MemberToGenerate member)
     {
-        if (member.GenericParameters.Count == 0)
+        if (member?.GenericParameters == null || member.GenericParameters.Count == 0)
         {
             return string.Empty;
         }
