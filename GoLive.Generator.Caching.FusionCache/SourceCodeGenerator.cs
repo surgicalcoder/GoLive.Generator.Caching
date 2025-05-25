@@ -130,7 +130,7 @@ public static class SourceCodeGenerator
 
             if (member.IsGenericMethod)
             {
-                source.Append($"<{member.returnType}>");
+                source.Append($"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>");
             }
 
             using (source.CreateParentheses())
@@ -170,7 +170,15 @@ public static class SourceCodeGenerator
             source.Append(", _ =>");
             using (source.CreateBracket())
             {
-                source.AppendLine($"return {member.Name}({string.Join(",", member.Parameters.Select(e => e.Name))}");
+                source.Append($"return {member.Name}");
+                
+                if (member.IsGenericMethod)
+                {
+                    source.Append($"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>");
+                }
+                
+                source.AppendLine($"({string.Join(",", member.Parameters.Select(e => e.Name))}");
+                
                 source.AppendLine(");");
             }
             source.Append(", ");
