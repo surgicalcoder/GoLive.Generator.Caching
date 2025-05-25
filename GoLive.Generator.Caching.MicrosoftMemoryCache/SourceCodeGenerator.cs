@@ -115,7 +115,7 @@ public static class SourceCodeGenerator
 
             if (member.IsGenericMethod)
             {
-                source.Append($"<{member.returnType}>");
+                source.Append($"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>");
             }
 
             using (source.CreateParentheses())
@@ -149,7 +149,13 @@ public static class SourceCodeGenerator
             
         source.AppendLine(2);
             
-        source.AppendLine($"value = {member.Name}({string.Join(",", member.Parameters.Select(e=>e.Name))});");
+        source.AppendLine($"value = {member.Name}");
+        if (member.IsGenericMethod)
+        {
+            source.Append($"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>");
+        }
+        
+        source.Append($"({string.Join(",", member.Parameters.Select(e=>e.Name))});");
         source.AppendLine($"memoryCache.Set<{member.returnType}>(cacheKey, value);");
         source.AppendLine("return value;");
     }

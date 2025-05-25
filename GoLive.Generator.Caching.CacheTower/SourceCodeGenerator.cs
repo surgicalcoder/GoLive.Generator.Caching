@@ -120,7 +120,7 @@ public static class SourceCodeGenerator
 
             if (member.IsGenericMethod)
             {
-                source.Append($"<{member.returnType}>");
+                source.Append($"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>");
             }
 
             using (source.CreateParentheses())
