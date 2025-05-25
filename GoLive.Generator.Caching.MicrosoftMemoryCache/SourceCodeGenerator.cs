@@ -88,6 +88,7 @@ public static class SourceCodeGenerator
 
             source.Append(")");
         }
+        source.Append(";");
     }
 
     private static void handleAsync(SourceStringBuilder source, ClassToGenerate classToGen, MemberToGenerate member)
@@ -121,6 +122,7 @@ public static class SourceCodeGenerator
             {
                 source.Append($"{string.Join(",", member.Parameters.Select(e => e.Name))}");
             }
+            source.Append(";");
         }
 
         source.Append(");");
