@@ -70,7 +70,71 @@ public static class SourceCodeGenerator
                 {
                     handleEvictCache(source, classToGen, member);
                 }
+                
+                // Add strongly typed method to get cache key
+                if (member.IsGenericMethod)
+                {
+                    source.AppendLine($"public static Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> {member.Name.FirstCharToUpper()}_GetCacheKey" +
+                                      $"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>" +
+                                      $"({string.Join(",", getMethodParameter(member.Parameters))})");
+                }
+                else
+                {
+                    source.AppendLine($"public static Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> {member.Name.FirstCharToUpper()}_GetCacheKey" +
+                                      $"({string.Join(",", getMethodParameter(member.Parameters))})");
+                }
+                
+                source.Append(GetGenericConstraints(member));
+                
+                handleGetCacheKey(source, classToGen, member);
+                
+                // Add strongly typed method to set cache
+                if (member.IsGenericMethod)
+                {
+                    source.AppendLine($"public void {member.Name.FirstCharToUpper()}_SetCache" +
+                                      $"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>" +
+                                      $"({member.returnType} value, TimeSpan duration{(member.Parameters.Count > 0 ? ", " : "")}{string.Join(", ", member.Parameters.Select(p => getParameterWithItemPrefix(p)))})");
+                }
+                else
+                {
+                    source.AppendLine($"public void {member.Name.FirstCharToUpper()}_SetCache" +
+                                      $"({member.returnType} value, TimeSpan duration{(member.Parameters.Count > 0 ? ", " : "")}{string.Join(", ", member.Parameters.Select(p => getParameterWithItemPrefix(p)))})");
+                }
+                
+                source.Append(GetGenericConstraints(member));
+                
+                handleSetCache(source, classToGen, member);
+            }
+            
+            // Add generic method to get cache key
+            source.AppendLine("public static object GetCacheKey(string className, string methodName, params object[] parameters)");
+            using (source.CreateBracket())
+            {
+                source.AppendLine("if (parameters == null || parameters.Length == 0)");
+                source.AppendLine("    return new Tuple<string>(className + \".\" + methodName);");
+                source.AppendLine();
+                source.AppendLine("// Create a dynamic tuple based on the number of parameters");
+                source.AppendLine("Type[] types = new Type[parameters.Length + 1];");
+                source.AppendLine("types[0] = typeof(string);");
+                source.AppendLine("for (int i = 0; i < parameters.Length; i++)");
+                source.AppendLine("    types[i + 1] = parameters[i]?.GetType() ?? typeof(object);");
+                source.AppendLine();
+                source.AppendLine("// Create the tuple type and constructor");
+                source.AppendLine("Type tupleType = Type.GetType($\"System.Tuple`{parameters.Length + 1}\").MakeGenericType(types);");
+                source.AppendLine("object[] args = new object[parameters.Length + 1];");
+                source.AppendLine("args[0] = className + \".\" + methodName;");
+                source.AppendLine("Array.Copy(parameters, 0, args, 1, parameters.Length);");
+                source.AppendLine();
+                source.AppendLine("// Create and return the tuple");
+                source.AppendLine("return Activator.CreateInstance(tupleType, args);");
+            }
 
+            // Add generic method to set cache
+            source.AppendLine("public void SetCache<T>(object cacheKey, T value, TimeSpan duration)");
+            using (source.CreateBracket())
+            {
+                source.AppendLine("var options = new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = duration };");
+                source.AppendLine("memoryCache.Set(cacheKey, value, options);");
             }
         }
     }
@@ -158,5 +222,65 @@ public static class SourceCodeGenerator
         source.Append($"({string.Join(",", member.Parameters.Select(e=>e.Name))});");
         source.AppendLine($"memoryCache.Set<{member.returnType}>(cacheKey, value);");
         source.AppendLine("return value;");
+    }
+
+    private static void handleGetCacheKey(SourceStringBuilder source, ClassToGenerate classToGen, MemberToGenerate member)
+    {
+        using (source.CreateBracket())
+        {
+            source.Append("return new Tuple<string");
+            if (member.Parameters.Count > 0)
+            {
+                source.Append($", {string.Join(",", member.Parameters.Select(e => e.Type))}");
+            }
+            source.Append(">(");
+            source.Append($"\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}{GetGenericParameterTypes(member, "_")}\"");
+            if (member.Parameters.Count > 0)
+            {
+                source.Append($", {string.Join(",", member.Parameters.Select(e => e.Name))}");
+            }
+            source.AppendLine(");");
+        }
+    }
+
+    private static void handleSetCache(SourceStringBuilder source, ClassToGenerate classToGen, MemberToGenerate member)
+    {
+        using (source.CreateBracket())
+        {
+            source.Append("var cacheKey = ");
+            source.Append($"{member.Name.FirstCharToUpper()}_GetCacheKey");
+            
+            if (member.IsGenericMethod)
+            {
+                source.Append($"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>");
+            }
+            
+            using (source.CreateParentheses())
+            {
+                source.Append($"{string.Join(", ", member.Parameters.Select(e => $"Item_{e.Name}"))}");
+            }
+            source.AppendLine(";");
+            
+            source.AppendLine("var options = new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = duration };");
+            source.AppendLine("memoryCache.Set(cacheKey, value, options);");
+        }
+    }
+
+    private static string getParameterWithItemPrefix(ParameterToGenerate param)
+    {
+        string baseParameter = $"{param.Type} Item_{param.Name}";
+        if (param.HasDefaultValue)
+        {
+            // Handle default values more carefully
+            if (string.IsNullOrEmpty(param.DefaultValue) || param.DefaultValue == "default" || param.DefaultValue == "null")
+            {
+                baseParameter += " = default";
+            }
+            else
+            {
+                baseParameter += $" = {param.DefaultValue}";
+            }
+        }
+        return baseParameter;
     }
 }
