@@ -152,18 +152,21 @@ public static class SourceCodeGenerator
     {
         using (source.CreateBracket())
         {
-            source.AppendLine("memoryCache.Remove(");
-            source.Append("(JsonSerializer.Serialize(");
-            source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> (\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}\" ");
+            source.AppendLine("await memoryCache.RemoveAsync(");
+            source.Append("(");
+            
+            source.AppendLine($"{member.Name.FirstCharToUpper()}_GetCacheKey");
+            if (member.IsGenericMethod && member.GenericParameters.Count > 0)
+            {
+                source.Append($"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>");
+            }
+            source.AppendLine("(");
             if (member.Parameters.Count > 0)
             {
-                source.Append($", {string.Join(",", member.Parameters.Select(e => e.Name))} ");
+                source.Append($"{string.Join(",", member.Parameters.Select(e => e.Name))} ");
             }
-            source.Append(")");
-
-            source.Append(", memoryCacheJsonSerializerOptions");
-                    
-            source.Append(")");
+            source.AppendLine(")");
+            
             source.Append(")");
             source.AppendLine(");");
         }
@@ -176,22 +179,20 @@ public static class SourceCodeGenerator
         source.AppendLine(2);
         using (source.CreateParentheses())
         {
-            using (source.CreateParentheses("JsonSerializer.Serialize"))
+            
+            
+            source.AppendLine($"{member.Name.FirstCharToUpper()}_GetCacheKey");
+            if (member.IsGenericMethod && member.GenericParameters.Count > 0)
             {
-                source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> ");
-
-                using (source.CreateParentheses())
-                {
-                    source.Append($"$\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}{GetGenericParameterTypes(member, "_")}\" ");
-
-                    if (member.Parameters.Count > 0)
-                    {
-                        source.Append($", {string.Join(",", member.Parameters.Select(e => e.Name))} ");
-                    }
-                }
-
-                source.Append(", memoryCacheJsonSerializerOptions");
+                source.Append($"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>");
             }
+            source.AppendLine("(");
+            if (member.Parameters.Count > 0)
+            {
+                source.Append($"{string.Join(",", member.Parameters.Select(e => e.Name))} ");
+            }
+            source.AppendLine(")");
+            
             source.Append(", async arg =>");
             source.Append($"await {member.Name}");
 
@@ -218,22 +219,18 @@ public static class SourceCodeGenerator
         source.AppendLine(2);
         using (source.CreateParentheses())
         {
-            using (source.CreateParentheses("JsonSerializer.Serialize"))
+            source.AppendLine($"{member.Name.FirstCharToUpper()}_GetCacheKey");
+            if (member.IsGenericMethod && member.GenericParameters.Count > 0)
             {
-                source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> ");
-
-                using (source.CreateParentheses())
-                {
-                    source.Append($"$\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}{GetGenericParameterTypes(member, "_")}\" ");
-
-                    if (member.Parameters.Count > 0)
-                    {
-                        source.Append($", {string.Join(",", member.Parameters.Select(e => e.Name))} ");
-                    }
-                }
-
-                source.Append(", memoryCacheJsonSerializerOptions");
+                source.Append($"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>");
             }
+            source.AppendLine("(");
+            if (member.Parameters.Count > 0)
+            {
+                source.Append($"{string.Join(",", member.Parameters.Select(e => e.Name))} ");
+            }
+            source.AppendLine(")");
+
             source.Append(", _ =>");
             using (source.CreateBracket())
             {
