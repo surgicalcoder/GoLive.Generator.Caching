@@ -105,29 +105,6 @@ public static class SourceCodeGenerator
                 
                 handleSetCache(source, classToGen, member);
             }
-            
-            // Add generic method to get cache key
-            source.AppendLine("public static object GetCacheKey(string className, string methodName, params object[] parameters)");
-            using (source.CreateBracket())
-            {
-                source.AppendLine("if (parameters == null || parameters.Length == 0)");
-                source.AppendLine("    return new Tuple<string>(className + \".\" + methodName);");
-                source.AppendLine();
-                source.AppendLine("// Create a dynamic tuple based on the number of parameters");
-                source.AppendLine("Type[] types = new Type[parameters.Length + 1];");
-                source.AppendLine("types[0] = typeof(string);");
-                source.AppendLine("for (int i = 0; i < parameters.Length; i++)");
-                source.AppendLine("    types[i + 1] = parameters[i]?.GetType() ?? typeof(object);");
-                source.AppendLine();
-                source.AppendLine("// Create the tuple type and constructor");
-                source.AppendLine("Type tupleType = Type.GetType($\"System.Tuple`{parameters.Length + 1}\").MakeGenericType(types);");
-                source.AppendLine("object[] args = new object[parameters.Length + 1];");
-                source.AppendLine("args[0] = className + \".\" + methodName;");
-                source.AppendLine("Array.Copy(parameters, 0, args, 1, parameters.Length);");
-                source.AppendLine();
-                source.AppendLine("// Create and return the tuple");
-                source.AppendLine("return Activator.CreateInstance(tupleType, args);");
-            }
 
             // Add generic method to set cache
             source.AppendLine("public void SetCache<T>(object cacheKey, T value, TimeSpan duration)");
@@ -143,14 +120,18 @@ public static class SourceCodeGenerator
     {
         using (source.CreateParentheses("memoryCache.Remove"))
         {
-            source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> " +
-                          $"($\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}{GetGenericParameterTypes(member, "_")}\" ");
-            if (member.Parameters.Count > 0)
+            source.Append($"{member.Name.FirstCharToUpper()}_GetCacheKey");
+            
+            if (member.IsGenericMethod)
             {
-                source.Append($", {string.Join(",", member.Parameters.Select(e => e.Name))} ");
+                source.Append($"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>");
             }
-
-            source.Append(")");
+            
+            using (source.CreateParentheses())
+            {
+                source.Append($"{string.Join(", ", member.Parameters.Select(e => $"{e.Name}"))}");
+            }
+            
         }
         source.Append(";");
     }
@@ -158,15 +139,18 @@ public static class SourceCodeGenerator
     private static void handleAsync(SourceStringBuilder source, ClassToGenerate classToGen, MemberToGenerate member)
     {
         source.Append("return await memoryCache.GetOrCreateAsync(");
-        source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> (\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}\" ");
-
-        if (member.Parameters.Count > 0)
+        source.Append($"{member.Name.FirstCharToUpper()}_GetCacheKey");
+            
+        if (member.IsGenericMethod)
         {
-            source.Append($", {string.Join(",", member.Parameters.Select(e => e.Name))} ");
+            source.Append($"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>");
         }
-
-        source.AppendLine(")");
-
+            
+        using (source.CreateParentheses())
+        {
+            source.Append($"{string.Join(", ", member.Parameters.Select(e => $"{e.Name}"))}");
+        }
+        
         source.Append(", async entry =>");
         using (source.CreateBracket())
         {
@@ -194,16 +178,20 @@ public static class SourceCodeGenerator
 
     private static void handleSync(SourceStringBuilder source, ClassToGenerate classToGen, MemberToGenerate member)
     {
-        source.Append($"Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> cacheKey = " +
-                      $"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}>" +
-                      $"(\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}\"");
+        source.Append($"var cacheKey = " );
 
-        if (member.Parameters.Count > 0)
+        source.Append($"{member.Name.FirstCharToUpper()}_GetCacheKey");
+            
+        if (member.IsGenericMethod)
         {
-            source.Append($", {string.Join(",", member.Parameters.Select(e=>e.Name))} ");
+            source.Append($"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>");
         }
             
-        source.AppendLine(");");
+        using (source.CreateParentheses())
+        {
+            source.Append($"{string.Join(", ", member.Parameters.Select(e => $"{e.Name}"))}");
+        }
+        source.Append(";");
         source.AppendLine(2);
             
         source.AppendLine($@"if (memoryCache.TryGetValue(cacheKey, out {member.returnType} value))

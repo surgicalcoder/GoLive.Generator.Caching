@@ -127,65 +127,62 @@ public static class SourceCodeGenerator
     private static void handleEvictCache(SourceStringBuilder source, ClassToGenerate classToGen, MemberToGenerate member)
     {
         source.AppendLine("await memoryCache.EvictAsync(");
-        source.Append("(JsonSerializer.Serialize(");
-        source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> " +
-                      $"($\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}{GetGenericParameterTypes(member, "_")}\" ");
+        source.Append("(");
+            
+        source.AppendLine($"{member.Name.FirstCharToUpper()}_GetCacheKey");
+        if (member.IsGenericMethod && member.GenericParameters.Count > 0)
+        {
+            source.Append($"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>");
+        }
+        source.AppendLine("(");
         if (member.Parameters.Count > 0)
         {
-            source.Append($", {string.Join(",", member.Parameters.Select(e => e.Name))} ");
+            source.Append($"{string.Join(",", member.Parameters.Select(e => e.Name))} ");
         }
-
-        source.Append(")");
-        source.Append(", memoryCacheJsonSerializerOptions");
-        source.AppendLine(")));");
+        source.AppendLine(")");
+        source.AppendLine("));");
     }
 
     private static void handleAsync(SourceStringBuilder source, ClassToGenerate classToGen, MemberToGenerate member)
     {
+        // Get the cache key using our GetCacheKey method
         source.Append("return await memoryCache.GetOrSetAsync");
         source.Append($"<{member.returnType}>");
         source.AppendLine(2);
         using (source.CreateParentheses())
         {
-            source.Append("JsonSerializer.Serialize");
-            using (source.CreateParentheses())
-            {
-                source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> ");
-
-                using (source.CreateParentheses())
-                {
-                    source.Append($"$\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}{GetGenericParameterTypes(member, "_")}\" ");
-
-                    if (member.Parameters.Count > 0)
-                    {
-                        source.Append($", {string.Join(",", member.Parameters.Select(e => e.Name))} ");
-                    }
-                }
-
-                source.Append(", memoryCacheJsonSerializerOptions");
-            }
-            source.Append(", async arg =>");
-            source.Append($"await {member.Name}");
-
+            // First parameter: cache key
+            source.Append($"{member.Name.FirstCharToUpper()}_GetCacheKey");
             if (member.IsGenericMethod)
             {
                 source.Append($"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>");
             }
-
+            using (source.CreateParentheses())
+            {
+                source.Append($"{string.Join(", ", member.Parameters.Select(e => e.Name))}");
+            }
+            
+            // Second parameter: factory method
+            source.Append(", async arg => await ");
+            source.Append($"{member.Name}");
+            if (member.IsGenericMethod)
+            {
+                source.Append($"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>");
+            }
             using (source.CreateParentheses())
             {
                 source.Append($"{string.Join(",", member.Parameters.Select(e => e.Name))}");
             }
-
+            
+            // Third parameter: options
             source.Append(", new CacheSettings");
             using (source.CreateParentheses())
             {
                 source.Append(GetTimeFrameValue(member.CacheDurationTimeFrame, member.CacheDuration));
-                source.Append(",");
+                source.Append(", ");
                 source.Append(GetTimeFrameValue(member.StaleDurationTimeFrame, member.StaleDuration));
             }
         }
-
         source.Append(";");
     }
 
