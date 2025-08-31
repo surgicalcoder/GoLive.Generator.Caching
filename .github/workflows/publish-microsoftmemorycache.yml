@@ -6,7 +6,7 @@ jobs:
   publish:
     env:
      MicrosoftMemoryCacheProject: 'GoLive.Generator.Caching.MicrosoftMemoryCache/GoLive.Generator.Caching.MicrosoftMemoryCache.csproj'
-     BUILD_VER : '2.1'
+     BUILD_VER : '2.2'
     name: build, pack & publish
     runs-on: windows-latest
     steps:

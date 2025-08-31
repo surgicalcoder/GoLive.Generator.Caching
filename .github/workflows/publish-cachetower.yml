@@ -6,7 +6,7 @@ jobs:
   publish:
     env:
      SOLUTION: 'GoLive.Generator.Caching.CacheTower/GoLive.Generator.Caching.CacheTower.csproj'
-     BUILD_VER : '2.1'
+     BUILD_VER : '2.2'
     name: build, pack & publish
     runs-on: windows-latest
     steps:
