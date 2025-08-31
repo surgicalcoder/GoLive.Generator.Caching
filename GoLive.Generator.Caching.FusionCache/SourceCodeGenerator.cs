@@ -94,34 +94,19 @@ public static class SourceCodeGenerator
                 // Add strongly typed method to set cache
                 if (member.IsGenericMethod)
                 {
-                    source.AppendLine($"public void {member.Name.FirstCharToUpper()}_SetCache" +
+                    source.AppendLine($"public async Task {member.Name.FirstCharToUpper()}_SetCache" +
                                       $"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>" +
-                                      $"({member.returnType} value, TimeSpan duration{(member.Parameters.Count > 0 ? ", " : "")}{string.Join(", ", member.Parameters.Select(p => getParameterWithItemPrefix(p)))})");
+                                      $"({member.returnType} value, TimeSpan duration{(member.Parameters.Count > 0 ? ", " : "")}{string.Join(", ", member.Parameters.Select(getParameterWithItemPrefix))})");
                 }
                 else
                 {
-                    source.AppendLine($"public void {member.Name.FirstCharToUpper()}_SetCache" +
-                                      $"({member.returnType} value, TimeSpan duration{(member.Parameters.Count > 0 ? ", " : "")}{string.Join(", ", member.Parameters.Select(p => getParameterWithItemPrefix(p)))})");
+                    source.AppendLine($"public async Task {member.Name.FirstCharToUpper()}_SetCache" +
+                                      $"({member.returnType} value, TimeSpan duration{(member.Parameters.Count > 0 ? ", " : "")}{string.Join(", ", member.Parameters.Select(getParameterWithItemPrefix))})");
                 }
                 
                 source.Append(GetGenericConstraints(member));
                 
                 handleSetCache(source, classToGen, member);
-            }
-
-            // Add generic method to get cache key
-            source.AppendLine("public static string GetCacheKey(string className, string methodName, params object[] parameters)");
-            using (source.CreateBracket())
-            {
-                source.AppendLine("var serializedParams = parameters != null && parameters.Length > 0 ? JsonSerializer.Serialize(parameters, memoryCacheJsonSerializerOptions) : string.Empty;");
-                source.AppendLine("return $\"{className}.{methodName}({serializedParams})\";");
-            }
-
-            // Add generic method to set cache
-            source.AppendLine("public void SetCache<T>(string cacheKey, T value, TimeSpan duration)");
-            using (source.CreateBracket())
-            {
-                source.AppendLine("memoryCache.Set(cacheKey, value, duration);");
             }
         }
     }    
@@ -284,7 +269,7 @@ public static class SourceCodeGenerator
             }
             source.AppendLine(";");
             
-            source.AppendLine("memoryCache.Set(cacheKey, value, duration);");
+            source.AppendLine("await memoryCache.SetAsync(cacheKey, value, duration);");
         }
     }
 
