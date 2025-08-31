@@ -119,7 +119,7 @@ public static class SourceCodeGenerator
             source.AppendLine("public async Task SetCache<T>(string cacheKey, T value, TimeSpan duration)");
             using (source.CreateBracket())
             {
-                source.AppendLine("await memoryCache.SetAsync(cacheKey, value, new CacheSettings(duration, TimeSpan.Zero));");
+                source.AppendLine("await memoryCache.SetAsync(cacheKey, value, duration);");
             }
         }
     }
@@ -242,7 +242,7 @@ public static class SourceCodeGenerator
             }
             source.AppendLine(";" );
             
-            source.AppendLine("await memoryCache.SetAsync(cacheKey, value, new CacheSettings(duration, TimeSpan.Zero));");
+            source.AppendLine("await memoryCache.SetAsync(cacheKey, value, duration);");
         }
     }
 
