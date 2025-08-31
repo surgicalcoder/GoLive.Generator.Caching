@@ -20,6 +20,7 @@ public partial class c1
         return $"{Input1} // {Input2}";
     }
 
+
     [Cache(3, TimeFrame.Minute)]
     private async Task<string> getAsyncValue(string Input1, string wibble = "blarg")
     {

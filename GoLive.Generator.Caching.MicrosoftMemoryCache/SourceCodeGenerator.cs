@@ -93,12 +93,12 @@ public static class SourceCodeGenerator
                 {
                     source.AppendLine($"public void {member.Name.FirstCharToUpper()}_SetCache" +
                                       $"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>" +
-                                      $"({member.returnType} value, TimeSpan duration{(member.Parameters.Count > 0 ? ", " : "")}{string.Join(", ", member.Parameters.Select(p => getParameterWithItemPrefix(p)))})");
+                                      $"({member.returnType} value {(member.Parameters.Count > 0 ? ", " : "")}{string.Join(", ", member.Parameters.Select(getParameterWithItemPrefix))}, TimeSpan duration = default)");
                 }
                 else
                 {
                     source.AppendLine($"public void {member.Name.FirstCharToUpper()}_SetCache" +
-                                      $"({member.returnType} value, TimeSpan duration{(member.Parameters.Count > 0 ? ", " : "")}{string.Join(", ", member.Parameters.Select(p => getParameterWithItemPrefix(p)))})");
+                                      $"({member.returnType} value {(member.Parameters.Count > 0 ? ", " : "")}{string.Join(", ", member.Parameters.Select(getParameterWithItemPrefix))}, TimeSpan duration = default)");
                 }
                 
                 source.Append(GetGenericConstraints(member));
@@ -249,7 +249,10 @@ public static class SourceCodeGenerator
             }
             source.AppendLine(";");
             
-            source.AppendLine("var options = new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = duration };");
+            source.AppendLine("TimeSpan effectiveDuration = duration == default ? " +
+                              $"{GetTimeFrameValue(member.CacheDurationTimeFrame, member.CacheDuration)} : duration;");
+            
+            source.AppendLine("var options = new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = effectiveDuration };");
             source.AppendLine("memoryCache.Set(cacheKey, value, options);");
         }
     }

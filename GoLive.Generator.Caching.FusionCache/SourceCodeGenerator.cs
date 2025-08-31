@@ -96,12 +96,12 @@ public static class SourceCodeGenerator
                 {
                     source.AppendLine($"public async Task {member.Name.FirstCharToUpper()}_SetCache" +
                                       $"<{string.Join(",", member.GenericParameters.Select(r => r.Name))}>" +
-                                      $"({member.returnType} value, TimeSpan duration{(member.Parameters.Count > 0 ? ", " : "")}{string.Join(", ", member.Parameters.Select(getParameterWithItemPrefix))})");
+                                      $"({member.returnType} value {(member.Parameters.Count > 0 ? ", " : "")}{string.Join(", ", member.Parameters.Select(getParameterWithItemPrefix))}, TimeSpan duration = default)");
                 }
                 else
                 {
                     source.AppendLine($"public async Task {member.Name.FirstCharToUpper()}_SetCache" +
-                                      $"({member.returnType} value, TimeSpan duration{(member.Parameters.Count > 0 ? ", " : "")}{string.Join(", ", member.Parameters.Select(getParameterWithItemPrefix))})");
+                                      $"({member.returnType} value {(member.Parameters.Count > 0 ? ", " : "")}{string.Join(", ", member.Parameters.Select(getParameterWithItemPrefix))}, TimeSpan duration = default)");
                 }
                 
                 source.Append(GetGenericConstraints(member));
@@ -240,7 +240,7 @@ public static class SourceCodeGenerator
         {
             source.Append("return JsonSerializer.Serialize(");
             source.Append($"new Tuple<string {getCommaIfParameters(member.Parameters)} {string.Join(",", member.Parameters.Select(e => e.Type))}> " +
-                         $"(\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}{GetGenericParameterTypes(member, "_")}\" ");
+                         $"($\"{classToGen.Namespace}.{classToGen.Name}.{member.Name}{GetGenericParameterTypes(member, "_")}\" ");
             if (member.Parameters.Count > 0)
             {
                 source.Append($", {string.Join(",", member.Parameters.Select(e => e.Name))} ");
@@ -269,7 +269,9 @@ public static class SourceCodeGenerator
             }
             source.AppendLine(";");
             
-            source.AppendLine("await memoryCache.SetAsync(cacheKey, value, duration);");
+            source.AppendLine("TimeSpan effectiveDuration = duration == default ? " +
+                             $"{GetTimeFrameValue(member.CacheDurationTimeFrame, member.CacheDuration)} : duration;");
+            source.AppendLine("await memoryCache.SetAsync(cacheKey, value, effectiveDuration);");
         }
     }
 
